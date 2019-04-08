@@ -1,0 +1,11 @@
+npm (){
+    docker run --rm -ti -v ~/.ssh:/root/.ssh -v ~/.config:/root/.config -v ~/.kube:/root/.kube -v $PWD:/var/gcloud -w /var/gcloud cprietorod/my-cloud-sdk-docker:latest npm $1 $2 $3 $3
+}
+
+node (){
+    docker run --rm -ti -v ~/.ssh:/root/.ssh -v ~/.config:/root/.config -v ~/.kube:/root/.kube -v $PWD:/var/gcloud -w /var/gcloud cprietorod/my-cloud-sdk-docker:latest node $1 $2 $3 $4
+}
+
+gulp (){
+    docker run --rm -ti -v ~/.ssh:/root/.ssh -v ~/.config:/root/.config -v ~/.kube:/root/.kube -v $PWD:/var/gcloud -w /var/gcloud cprietorod/my-cloud-sdk-docker:latest gulp $1 $2 $3 $4
+}
