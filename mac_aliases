@@ -1,6 +1,7 @@
 export PATH=$PWD/:$PATH:$HOME/Desarrollo/scripts:$HOME/Desarrollo/google-cloud-sdk/platform/google_appengine
-export GCLOUD_COMMAND='docker run --rm -ti -p 3000:3000 -p 8080:8080 -p 8000:8000 -v ~/.gitconfig:/root/.gitconfig -v ~/.gitcookies:/root/.gitcookies -v ~/.oh-my-zsh/:/root/.oh-my-zsh/ -v ~/.zshrc:/root/.zshrc -v ~/.linux_aliases:/root/.linux_aliases -v ~/.linux_functions:/root/.linux_functions -v ~/.local/share/nvim:/root/.local/share/nvim:cached -v ~/.ssh:/root/.ssh:cached -v ~/.config:/root/.config:cached -v ~/.kube:/root/.kube:cached -v $PWD:/var/gcloud:cached -w /var/gcloud cprietorod/my-cloud-sdk-docker:latest'
-alias vscode=code
+export GCLOUD1='docker run --rm -p 3000:3000 -p 8443:8443 -p 8080:8080 -p 8000:8000 -v ~/.vsextentions:/root/.vsextentions -v ~/.gitconfig:/root/.gitconfig -v ~/.gitcookies:/root/.gitcookies -v ~/.oh-my-zsh/:/root/.oh-my-zsh/ -v ~/.zshrc:/root/.zshrc -v ~/.linux_aliases:/root/.linux_aliases -v ~/.linux_functions:/root/.linux_functions -v ~/.local/share/nvim:/root/.local/share/nvim:cached -v ~/.ssh:/root/.ssh:cached -v ~/.config:/root/.config:cached -v ~/.kube:/root/.kube:cached -v $PWD:/var/gcloud:cached -w /var/gcloud'
+export GCLOUD2='cprietorod/my-cloud-sdk-docker:latest'
+export GCLOUD_COMMAND="$GCLOUD1 -ti $GCLOUD2"
 alias whatismyip="curl -s checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//'"
 alias mysqld_start="docker run --name mysql1 --rm -p 3306:3306 -v $HOME:$HOME -v $HOME/Desarrollo/db/mysql-conf:/etc/mysql/mysql.conf.d -v $HOME/Desarrollo/db/mysql-data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=Ove52SWE -d mysql:5.7"
 alias mysqld_stop="docker stop mysql1"
@@ -12,12 +13,12 @@ alias pgadmin4='docker run -p 8080:80 -e "PGADMIN_DEFAULT_EMAIL=user@domain.com"
 alias gcloud="$GCLOUD_COMMAND gcloud"
 alias gsutil="$GCLOUD_COMMAND gsutil"
 alias kubectl="$GCLOUD_COMMAND kubectl"
-alias python3="$GCLOUD_COMMAND python3"
-alias pip3="$GCLOUD_COMMAND pip3"
-alias python="$GCLOUD_COMMAND python2"
-alias pip="$GCLOUD_COMMAND pip2"
+#alias python3="$GCLOUD_COMMAND python3"
+#alias pip3="$GCLOUD_COMMAND pip3"
+#alias python="$GCLOUD_COMMAND python2"
+#alias pip="$GCLOUD_COMMAND pip2"
 alias make="$GCLOUD_COMMAND make"
 alias dev_bash="$GCLOUD_COMMAND bash"
 alias dev_zsh="$GCLOUD_COMMAND zsh"
 alias dev_nvim="$GCLOUD_COMMAND nvim"
-alias theia="$GCLOUD_COMMAND bash -c \"source /root/.linux_functions ; theia_run\""
+alias vscode="docker stop vscode || echo 'no hay docker' ; $GCLOUD1 -d --name vscode $GCLOUD2 code-server -H -N -e /root/.vsextentions ; /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:8443 --profile-directory=\"Profile 4\" "
