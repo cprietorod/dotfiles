@@ -1,0 +1,6 @@
+local/share/code-server/Backups
+local/share/code-server/CachedExtensions
+local/share/code-server/globalStorage
+local/share/code-server/self-signed.cert
+local/share/code-server/self-signed.key
+
