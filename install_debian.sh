@@ -1,12 +1,11 @@
-echo "Brew installation"
-which brew || /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-which docker || brew install docker 
-which docker-compose || brew install docker-compose 
-which docker-machine || brew install docker-machine 
-brew list tmux || brew install tmux
-brew list neovim || brew install neovim
-brew list python || brew install python
-brew list zsh || brew install zsh
+apt update
+which docker || apt install docker 
+which docker-compose || apt install docker-compose 
+which docker-machine || apt install docker-machine 
+which tmux || apt install tmux
+which neovim || apt install neovim
+which python3 || apt install python3
+which zsh || apt install zsh
 echo "spacevim installation"
 ls ~/.SpaceVim || (curl -sLf https://spacevim.org/install.sh | bash)
 echo "oh-my-zsh installation"
