@@ -1,19 +1,3 @@
-export TERM="xterm-256color"
-
-export ZSH="$HOME/.oh-my-zsh"
-
-
-ZSH_THEME="avit"
-
-
-plugins=(
-  git
-)
-
-source $ZSH/oh-my-zsh.sh
-
-##Carlos Custom##
-
 unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     machine=Linux;;
@@ -30,8 +14,8 @@ if [ "$machine" = "Linux" ]; then
   source /root/.linux_functions
 elif [ "$machine" = "Mac" ]; then 
   echo "es mac"
-  tmux || echo "tmux already run"
   source .mac_aliases
   source .mac_functions
-  tmux info &> /dev/null || exit
 fi
+
+

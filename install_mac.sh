@@ -12,10 +12,12 @@ ls ~/.SpaceVim || (curl -sLf https://spacevim.org/install.sh | bash)
 echo "oh-my-zsh installation"
 ls ~/.oh-my-zsh || sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 (test -L ~/.linux_aliases && echo ".linux_aliases exist") || (echo "coping linux_aliases" && ln -s "$PWD/linux_aliases" ~/.linux_aliases)
+(test -L ~/.linux_functions && echo ".linux_functions exist") || (echo "coping linux_functions" && ln -s "$PWD/linux_functions" ~/.linux_functions)
 (test -L ~/.mac_aliases && echo ".mac_aliases exist") || (echo "coping mac_aliases" && ln -s "$PWD/mac_aliases" ~/.mac_aliases)
 (test -L ~/.mac_functions && echo ".mac_functions exist") || (echo "coping mac_functions" && ln -s "$PWD/mac_functions" ~/.mac_functions)
 (test -L ~/.tmux.conf && echo ".tmux.conf exist") || (echo "coping tmux.conf" && ln -s "$PWD/tmux.conf" ~/.tmux.conf)
 (test -L ~/.zshrc && echo ".zshrc exist") || (echo "coping zshrc" && ln -s "$PWD/zshrc" ~/.zshrc)
+(test -L ~/.bashrc && echo ".bashrc exist") || (echo "coping bashrc" && ln -s "$PWD/bashrc" ~/.bashrc)
 (test -L ~/.vsextentions && echo ".vsextentions exist") || (echo "coping vsextentions" && ln -s "$PWD/vsextentions" ~/.vsextentions)
 (test -L ~/.SpaceVim.d && echo ".SpaceVim.d exist") || (echo "coping SpaceVim.d" && ln -s "$PWD/SpaceVim.d" ~/.SpaceVim.d)
 (test -L ~/.config/blue.tmuxtheme && echo ".config/blue.tmuxtheme exist") || (echo "coping config/blue.tmuxtheme" && ln -s "$PWD/config/blue.tmuxtheme" ~/.config/blue.tmuxtheme)
