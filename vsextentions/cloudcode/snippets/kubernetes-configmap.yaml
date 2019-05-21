@@ -1,0 +1,10 @@
+name: kubernetes-configmap
+label: Kubernetes ConfigMap
+markdownDescription: Creates yaml for Kubernetes ConfigMap object
+insertText: |
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${1:appname}
+  data:
+    ${2:key}: ${3:value}

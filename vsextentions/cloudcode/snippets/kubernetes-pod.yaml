@@ -1,0 +1,20 @@
+name: kubernetes-pod
+label: Kubernetes Pod
+markdownDescription: Creates yaml for Kubernetes Pod object
+insertText: |2
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: ${1:appname}
+    labels:
+      name: ${1:appname}
+  spec:
+    containers:
+    - name: ${1:appname}
+      image: ${2:gcr.io/google-containers/busybox}
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      ports:
+        - containerPort: ${3:8080}

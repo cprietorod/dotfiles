@@ -1,0 +1,2301 @@
+{
+  "type": "object",
+  "anyOf": [
+    {
+      "$ref": "#/definitions/Configuration"
+    },
+    {
+      "$ref": "#/definitions/Revision"
+    },
+    {
+      "$ref": "#/definitions/Route"
+    },
+    {
+      "$ref": "#/definitions/Service"
+    }
+  ],
+  "definitions": {
+    "Configuration": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "metadata": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+          "description": "+optional\n"
+        },
+        "spec": {
+          "$ref": "#/definitions/ConfigurationSpec",
+          "description": "Spec holds the desired state of the Configuration (from the client).\n+optional\n"
+        },
+        "status": {
+          "$ref": "#/definitions/ConfigurationStatus",
+          "description": "Status communicates the observed state of the Configuration (from the controller).\n+optional\n"
+        }
+      },
+      "description": "Configuration represents the \"floating HEAD\" of a linear history of Revisions,\nand optionally how the containers those revisions reference are built.\nUsers create new Revisions by updating the Configuration's spec.\nThe \"latest created\" revision's name is available under status, as is the\n\"latest ready\" revision's name.\nSee also: https://github.com/knative/serving/blob/master/docs/spec/overview.md#configuration\n"
+    },
+    "ConfigurationSpec": {
+      "properties": {
+        "build": {
+          "$ref": "#/definitions/RawExtension",
+          "description": "Build optionally holds the specification for the build to\nperform to produce the Revision's container image.\n+optional\n"
+        },
+        "generation": {
+          "type": "integer",
+          "description": "DeprecatedGeneration was used prior in Kubernetes versions \u003c1.11\nwhen metadata.generation was not being incremented by the api server\n\nThis property will be dropped in future Knative releases and should\nnot be used - use metadata.generation\n\nTracking issue: https://github.com/knative/serving/issues/643\n\n+optional\n"
+        },
+        "revisionTemplate": {
+          "$ref": "#/definitions/RevisionTemplateSpec",
+          "description": "RevisionTemplate holds the latest specification for the Revision to\nbe stamped out. If a Build specification is provided, then the\nRevisionTemplate's BuildName field will be populated with the name of\nthe Build object created to produce the container for the Revision.\n+optional\n"
+        }
+      },
+      "description": "ConfigurationSpec holds the desired state of the Configuration (from the client).\n"
+    },
+    "ConfigurationStatus": {
+      "properties": {
+        "conditions": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Conditions",
+          "description": "Conditions communicates information about ongoing/complete\nreconciliation processes that bring the \"spec\" inline with the observed\nstate of the world.\n+optional\n"
+        },
+        "latestCreatedRevisionName": {
+          "type": "string",
+          "description": "LatestCreatedRevisionName is the last revision that was created from this\nConfiguration. It might not be ready yet, for that use LatestReadyRevisionName.\n+optional\n"
+        },
+        "latestReadyRevisionName": {
+          "type": "string",
+          "description": "LatestReadyRevisionName holds the name of the latest Revision stamped out\nfrom this Configuration that has had its \"Ready\" condition become \"True\".\n+optional\n"
+        },
+        "observedGeneration": {
+          "type": "integer",
+          "description": "ObservedGeneration is the 'Generation' of the Configuration that\nwas last processed by the controller. The observed generation is updated\neven if the controller failed to process the spec and create the Revision.\n+optional\n"
+        }
+      },
+      "description": "ConfigurationStatus communicates the observed state of the Configuration (from the controller).\n"
+    },
+    "DeprecatedRevisionServingStateType": {
+      "type": "string",
+      "description": "DeprecatedRevisionServingStateType is an enumeration of the levels of serving readiness of the Revision.\nSee also: https://github.com/knative/serving/blob/master/docs/spec/errors.md#error-conditions-and-reporting\n"
+    },
+    "ManualType": {
+      "description": "ManualType contains the options for configuring a manual service. See ServiceSpec for\nmore details.\n"
+    },
+    "PinnedType": {
+      "properties": {
+        "configuration": {
+          "$ref": "#/definitions/ConfigurationSpec",
+          "description": "The configuration for this service.\n+optional\n"
+        },
+        "revisionName": {
+          "type": "string",
+          "description": "The revision name to pin this service to until changed\nto a different service type.\n+optional\n"
+        }
+      },
+      "description": "PinnedType is DEPRECATED. ReleaseType should be used instead. To get the behavior of PinnedType set\nReleaseType.Revisions to []string{PinnedType.RevisionName} and ReleaseType.RolloutPercent to 0.\n"
+    },
+    "RawExtension": {
+      "description": "RawExtension is modeled after runtime.RawExtension, and should be\nreplaced with it (or an alias) once we can stop supporting embedded\nBuildSpecs.\n"
+    },
+    "ReleaseType": {
+      "properties": {
+        "configuration": {
+          "$ref": "#/definitions/ConfigurationSpec",
+          "description": "The configuration for this service. All revisions from this service must\ncome from a single configuration.\n+optional\n"
+        },
+        "revisions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Revisions is an ordered list of 1 or 2 revisions. The first will\nhave a TrafficTarget with a name of \"current\" and the second will have\na name of \"candidate\".\n+optional\n"
+        },
+        "rolloutPercent": {
+          "type": "integer",
+          "description": "RolloutPercent is the percent of traffic that should be sent to the \"candidate\"\nrevision. Valid values are between 0 and 99 inclusive.\n+optional\n"
+        }
+      },
+      "description": "ReleaseType contains the options for slowly releasing revisions. See ServiceSpec for\nmore details.\n"
+    },
+    "Revision": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "metadata": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+          "description": "+optional\n"
+        },
+        "spec": {
+          "$ref": "#/definitions/RevisionSpec",
+          "description": "Spec holds the desired state of the Revision (from the client).\n+optional\n"
+        },
+        "status": {
+          "$ref": "#/definitions/RevisionStatus",
+          "description": "Status communicates the observed state of the Revision (from the controller).\n+optional\n"
+        }
+      },
+      "description": "Revision is an immutable snapshot of code and configuration.  A revision\nreferences a container image, and optionally a build that is responsible for\nmaterializing that container image from source. Revisions are created by\nupdates to a Configuration.\n\nSee also: https://github.com/knative/serving/blob/master/docs/spec/overview.md#revision\n"
+    },
+    "RevisionContainerConcurrencyType": {
+      "type": "integer",
+      "description": "RevisionContainerConcurrencyType is an integer expressing a number of\nin-flight (concurrent) requests.\n"
+    },
+    "RevisionRequestConcurrencyModelType": {
+      "type": "string",
+      "description": "RevisionRequestConcurrencyModelType is an enumeration of the\nconcurrency models supported by a Revision.\nDeprecated in favor of RevisionContainerConcurrencyType.\n"
+    },
+    "RevisionSpec": {
+      "properties": {
+        "buildName": {
+          "type": "string",
+          "description": "DeprecatedBuildName optionally holds the name of the Build responsible for\nproducing the container image for its Revision.\nDEPRECATED: Use BuildRef instead.\n+optional\n"
+        },
+        "buildRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ObjectReference",
+          "description": "BuildRef holds the reference to the build (if there is one) responsible\nfor producing the container image for this Revision. Otherwise, nil\n+optional\n"
+        },
+        "concurrencyModel": {
+          "$ref": "#/definitions/RevisionRequestConcurrencyModelType",
+          "description": "DeprecatedConcurrencyModel specifies the desired concurrency model\n(Single or Multi) for the\nRevision. Defaults to Multi.\nDeprecated in favor of ContainerConcurrency.\n+optional\n"
+        },
+        "container": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Container",
+          "description": "Container defines the unit of execution for this Revision.\nIn the context of a Revision, we disallow a number of the fields of\nthis Container, including: name and lifecycle.\nSee also the runtime contract for more information about the execution\nenvironment:\nhttps://github.com/knative/serving/blob/master/docs/runtime-contract.md\n+optional\n"
+        },
+        "containerConcurrency": {
+          "$ref": "#/definitions/RevisionContainerConcurrencyType",
+          "description": "ContainerConcurrency specifies the maximum allowed\nin-flight (concurrent) requests per container of the Revision.\nDefaults to `0` which means unlimited concurrency.\nThis field replaces ConcurrencyModel. A value of `1`\nis equivalent to `Single` and `0` is equivalent to `Multi`.\n+optional\n"
+        },
+        "generation": {
+          "type": "integer",
+          "description": "DeprecatedGeneration was used prior in Kubernetes versions \u003c1.11\nwhen metadata.generation was not being incremented by the api server\n\nThis property will be dropped in future Knative releases and should\nnot be used - use metadata.generation\n\nTracking issue: https://github.com/knative/serving/issues/643\n\n+optional\n"
+        },
+        "serviceAccountName": {
+          "type": "string",
+          "description": "ServiceAccountName holds the name of the Kubernetes service account\nas which the underlying K8s resources should be run. If unspecified\nthis will default to the \"default\" service account for the namespace\nin which the Revision exists.\nThis may be used to provide access to private container images by\nfollowing: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account\nTODO(ZhiminXiang): verify the corresponding service account exists.\n+optional\n"
+        },
+        "servingState": {
+          "$ref": "#/definitions/DeprecatedRevisionServingStateType",
+          "description": "DeprecatedServingState holds a value describing the desired state the Kubernetes\nresources should be in for this Revision.\nUsers must not specify this when creating a revision. These values are no longer\nupdated by the system.\n+optional\n"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "description": "TimeoutSeconds holds the max duration the instance is allowed for responding to a request.\n+optional\n"
+        },
+        "volumes": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.Volume"
+          },
+          "type": "array",
+          "description": "Volumes defines a set of Kubernetes volumes to be mounted into the\nspecified Container.  Currently only ConfigMap and Secret volumes are\nsupported.\n"
+        }
+      },
+      "description": "RevisionSpec holds the desired state of the Revision (from the client).\n"
+    },
+    "RevisionStatus": {
+      "properties": {
+        "conditions": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Conditions",
+          "description": "Conditions communicates information about ongoing/complete\nreconciliation processes that bring the \"spec\" inline with the observed\nstate of the world.\n+optional\n"
+        },
+        "imageDigest": {
+          "type": "string",
+          "description": "ImageDigest holds the resolved digest for the image specified\nwithin .Spec.Container.Image. The digest is resolved during the creation\nof Revision. This field holds the digest value regardless of whether\na tag or digest was originally specified in the Container object. It\nmay be empty if the image comes from a registry listed to skip resolution.\n+optional\n"
+        },
+        "logUrl": {
+          "type": "string",
+          "description": "LogURL specifies the generated logging url for this particular revision\nbased on the revision url template specified in the controller's config.\n+optional\n"
+        },
+        "observedGeneration": {
+          "type": "integer",
+          "description": "ObservedGeneration is the 'Generation' of the Configuration that\nwas last processed by the controller. The observed generation is updated\neven if the controller failed to process the spec and create the Revision.\n+optional\n"
+        },
+        "serviceName": {
+          "type": "string",
+          "description": "ServiceName holds the name of a core Kubernetes Service resource that\nload balances over the pods backing this Revision. When the Revision\nis Active, this service would be an appropriate ingress target for\ntargeting the revision.\n+optional\n"
+        }
+      },
+      "description": "RevisionStatus communicates the observed state of the Revision (from the controller).\n"
+    },
+    "RevisionTemplateSpec": {
+      "properties": {
+        "metadata": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+          "description": "+optional\n"
+        },
+        "spec": {
+          "$ref": "#/definitions/RevisionSpec",
+          "description": "+optional\n"
+        }
+      },
+      "description": "RevisionTemplateSpec describes the data a revision should have when created from a template.\nBased on: https://github.com/kubernetes/api/blob/e771f807/core/v1/types.go#L3179-L3190\n"
+    },
+    "Route": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "metadata": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+          "description": "+optional\n"
+        },
+        "spec": {
+          "$ref": "#/definitions/RouteSpec",
+          "description": "Spec holds the desired state of the Route (from the client).\n+optional\n"
+        },
+        "status": {
+          "$ref": "#/definitions/RouteStatus",
+          "description": "Status communicates the observed state of the Route (from the controller).\n+optional\n"
+        }
+      },
+      "description": "Route is responsible for configuring ingress over a collection of Revisions.\nSome of the Revisions a Route distributes traffic over may be specified by\nreferencing the Configuration responsible for creating them; in these cases\nthe Route is additionally responsible for monitoring the Configuration for\n\"latest ready\" revision changes, and smoothly rolling out latest revisions.\nSee also: https://github.com/knative/serving/blob/master/docs/spec/overview.md#route\n"
+    },
+    "RouteSpec": {
+      "properties": {
+        "generation": {
+          "type": "integer",
+          "description": "DeprecatedGeneration was used prior in Kubernetes versions \u003c1.11\nwhen metadata.generation was not being incremented by the api server\n\nThis property will be dropped in future Knative releases and should\nnot be used - use metadata.generation\n\nTracking issue: https://github.com/knative/serving/issues/643\n\n+optional\n"
+        },
+        "traffic": {
+          "items": {
+            "$ref": "#/definitions/TrafficTarget"
+          },
+          "type": "array",
+          "description": "Traffic specifies how to distribute traffic over a collection of Knative Serving Revisions and Configurations.\n+optional\n"
+        }
+      },
+      "description": "RouteSpec holds the desired state of the Route (from the client).\n"
+    },
+    "RouteStatus": {
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Addressable",
+          "description": "Address holds the information needed for a Route to be the target of an event.\n+optional\n"
+        },
+        "conditions": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Conditions",
+          "description": "Conditions communicates information about ongoing/complete\nreconciliation processes that bring the \"spec\" inline with the observed\nstate of the world.\n+optional\n"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain holds the top-level domain that will distribute traffic over the provided targets.\nIt generally has the form {route-name}.{route-namespace}.{cluster-level-suffix}\n+optional\n"
+        },
+        "domainInternal": {
+          "type": "string",
+          "description": "DeprecatedDomainInternal holds the top-level domain that will distribute traffic over the provided\ntargets from inside the cluster. It generally has the form\n{route-name}.{route-namespace}.svc.{cluster-domain-name}\nDEPRECATED: Use Address instead.\n+optional\n"
+        },
+        "observedGeneration": {
+          "type": "integer",
+          "description": "ObservedGeneration is the 'Generation' of the Configuration that\nwas last processed by the controller. The observed generation is updated\neven if the controller failed to process the spec and create the Revision.\n+optional\n"
+        },
+        "traffic": {
+          "items": {
+            "$ref": "#/definitions/TrafficTarget"
+          },
+          "type": "array",
+          "description": "Traffic holds the configured traffic distribution.\nThese entries will always contain RevisionName references.\nWhen ConfigurationName appears in the spec, this will hold the\nLatestReadyRevisionName that we last observed.\n+optional\n"
+        }
+      },
+      "description": "RouteStatus communicates the observed state of the Route (from the controller).\n"
+    },
+    "RunLatestType": {
+      "properties": {
+        "configuration": {
+          "$ref": "#/definitions/ConfigurationSpec",
+          "description": "The configuration for this service.\n+optional\n"
+        }
+      },
+      "description": "RunLatestType contains the options for always having a route to the latest configuration. See\nServiceSpec for more details.\n"
+    },
+    "Service": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "metadata": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta",
+          "description": "+optional\n"
+        },
+        "spec": {
+          "$ref": "#/definitions/ServiceSpec",
+          "description": "+optional\n"
+        },
+        "status": {
+          "$ref": "#/definitions/ServiceStatus",
+          "description": "+optional\n"
+        }
+      },
+      "description": "Service acts as a top-level container that manages a set of Routes and\nConfigurations which implement a network service. Service exists to provide a\nsingular abstraction which can be access controlled, reasoned about, and\nwhich encapsulates software lifecycle decisions such as rollout policy and\nteam resource ownership. Service acts only as an orchestrator of the\nunderlying Routes and Configurations (much as a kubernetes Deployment\norchestrates ReplicaSets), and its usage is optional but recommended.\n\nThe Service's controller will track the statuses of its owned Configuration\nand Route, reflecting their statuses and conditions as its own.\n\nSee also: https://github.com/knative/serving/blob/master/docs/spec/overview.md#service\n"
+    },
+    "ServiceSpec": {
+      "properties": {
+        "generation": {
+          "type": "integer",
+          "description": "DeprecatedGeneration was used prior in Kubernetes versions \u003c1.11\nwhen metadata.generation was not being incremented by the api server\n\nThis property will be dropped in future Knative releases and should\nnot be used - use metadata.generation\n\nTracking issue: https://github.com/knative/serving/issues/643\n\n+optional\n"
+        },
+        "manual": {
+          "$ref": "#/definitions/ManualType",
+          "description": "Manual mode enables users to start managing the underlying Route and Configuration\nresources directly.  This advanced usage is intended as a path for users to graduate\nfrom the limited capabilities of Service to the full power of Route.\n+optional\n"
+        },
+        "pinned": {
+          "$ref": "#/definitions/PinnedType",
+          "description": "DeprecatedPinned is DEPRECATED in favor of ReleaseType\n+optional\n"
+        },
+        "release": {
+          "$ref": "#/definitions/ReleaseType",
+          "description": "Release enables gradual promotion of new revisions by allowing traffic\nto be split between two revisions. This type replaces the deprecated Pinned type.\n+optional\n"
+        },
+        "runLatest": {
+          "$ref": "#/definitions/RunLatestType",
+          "description": "RunLatest defines a simple Service. It will automatically\nconfigure a route that keeps the latest ready revision\nfrom the supplied configuration running.\n+optional\n"
+        }
+      },
+      "description": "ServiceSpec represents the configuration for the Service object. Exactly one\nof its members (other than Generation) must be specified. Services can either\ntrack the latest ready revision of a configuration or be pinned to a specific\nrevision.\n"
+    },
+    "ServiceStatus": {
+      "properties": {
+        "address": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Addressable",
+          "description": "Address holds the information needed for a Route to be the target of an event.\n+optional\n"
+        },
+        "conditions": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Conditions",
+          "description": "+optional\n"
+        },
+        "domain": {
+          "type": "string",
+          "description": "From RouteStatus.\nDomain holds the top-level domain that will distribute traffic over the provided targets.\nIt generally has the form {route-name}.{route-namespace}.{cluster-level-suffix}\n+optional\n"
+        },
+        "domainInternal": {
+          "type": "string",
+          "description": "From RouteStatus.\nDeprecatedDomainInternal holds the top-level domain that will distribute traffic over the provided\ntargets from inside the cluster. It generally has the form\n{route-name}.{route-namespace}.svc.{cluster-domain-name}\nDEPRECATED: Use Address instead.\n+optional\n"
+        },
+        "latestCreatedRevisionName": {
+          "type": "string",
+          "description": "From ConfigurationStatus.\nLatestCreatedRevisionName is the last revision that was created from this Service's\nConfiguration. It might not be ready yet, for that use LatestReadyRevisionName.\n+optional\n"
+        },
+        "latestReadyRevisionName": {
+          "type": "string",
+          "description": "From ConfigurationStatus.\nLatestReadyRevisionName holds the name of the latest Revision stamped out\nfrom this Service's Configuration that has had its \"Ready\" condition become \"True\".\n+optional\n"
+        },
+        "observedGeneration": {
+          "type": "integer",
+          "description": "ObservedGeneration is the 'Generation' of the Service that\nwas last processed by the controller.\n+optional\n"
+        },
+        "traffic": {
+          "items": {
+            "$ref": "#/definitions/TrafficTarget"
+          },
+          "type": "array",
+          "description": "From RouteStatus.\nTraffic holds the configured traffic distribution.\nThese entries will always contain RevisionName references.\nWhen ConfigurationName appears in the spec, this will hold the\nLatestReadyRevisionName that we last observed.\n+optional\n"
+        }
+      },
+      "description": "ServiceStatus represents the Status stanza of the Service resource.\n"
+    },
+    "TrafficTarget": {
+      "properties": {
+        "configurationName": {
+          "type": "string",
+          "description": "ConfigurationName of a configuration to whose latest revision we will send\nthis portion of traffic. When the \"status.latestReadyRevisionName\" of the\nreferenced configuration changes, we will automatically migrate traffic\nfrom the prior \"latest ready\" revision to the new one.\nThis field is never set in Route's status, only its spec.\nThis is mutually exclusive with RevisionName.\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name is optionally used to expose a dedicated hostname for referencing this\ntarget exclusively. It has the form: {name}.${route.status.domain}\n+optional\n"
+        },
+        "percent": {
+          "type": "integer",
+          "description": "Percent specifies percent of the traffic to this Revision or Configuration.\nThis defaults to zero if unspecified.\n"
+        },
+        "revisionName": {
+          "type": "string",
+          "description": "RevisionName of a specific revision to which to send this portion of traffic.\nThis is mutually exclusive with ConfigurationName.\n+optional\n"
+        }
+      },
+      "description": "TrafficTarget holds a single entry of the routing table for a Route.\n"
+    },
+    "github.com.knative.pkg.apis.VolatileTime": {
+      "description": "VolatileTime wraps metav1.Time\n"
+    },
+    "github.com.knative.pkg.apis.duck.v1alpha1.Addressable": {
+      "properties": {
+        "hostname": {
+          "type": "string"
+        }
+      },
+      "description": "Addressable is the schema for the destination information. This is\ntypically stored in the object's `status`, as this information may\nbe generated by the controller.\n"
+    },
+    "github.com.knative.pkg.apis.duck.v1alpha1.Condition": {
+      "properties": {
+        "lastTransitionTime": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.VolatileTime",
+          "description": "LastTransitionTime is the last time the condition transitioned from one status to another.\nWe use VolatileTime in place of metav1.Time to exclude this from creating equality.Semantic\ndifferences (all other things held constant).\n+optional\n"
+        },
+        "message": {
+          "type": "string",
+          "description": "A human readable message indicating details about the transition.\n+optional\n"
+        },
+        "reason": {
+          "type": "string",
+          "description": "The reason for the condition's last transition.\n+optional\n"
+        },
+        "severity": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.ConditionSeverity",
+          "description": "Severity with which to treat failures of this type of condition.\nWhen this is not specified, it defaults to Error.\n+optional\n"
+        },
+        "status": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ConditionStatus",
+          "description": "Status of the condition, one of True, False, Unknown.\n+required\n"
+        },
+        "type": {
+          "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.ConditionType",
+          "description": "Type of condition.\n+required\n"
+        }
+      },
+      "description": "Conditions defines a readiness condition for a Knative resource.\nSee: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#typical-status-properties\n+k8s:deepcopy-gen=true\n"
+    },
+    "github.com.knative.pkg.apis.duck.v1alpha1.ConditionSeverity": {
+      "type": "string",
+      "description": "ConditionSeverity expresses the severity of a Condition Type failing.\n"
+    },
+    "github.com.knative.pkg.apis.duck.v1alpha1.ConditionType": {
+      "type": "string",
+      "description": "ConditionType is a camel-cased condition type.\n"
+    },
+    "github.com.knative.pkg.apis.duck.v1alpha1.Conditions": {
+      "items": {
+        "$ref": "#/definitions/github.com.knative.pkg.apis.duck.v1alpha1.Condition"
+      },
+      "type": "array",
+      "description": "Conditions is the schema for the conditions portion of the payload\n"
+    },
+    "k8s.io.api.core.v1.AWSElasticBlockStoreVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional\n"
+        },
+        "partition": {
+          "type": "integer",
+          "description": "The partition in the volume that you want to mount.\nIf omitted, the default is to mount by volume name.\nExamples: For volume /dev/sda1, you specify the partition as \"1\".\nSimilarly, the volume partition for /dev/sda is \"0\" (or you can leave the property empty).\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Specify \"true\" to force and set the ReadOnly property in VolumeMounts to \"true\".\nIf omitted, the default is \"false\".\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional\n"
+        },
+        "volumeID": {
+          "type": "string",
+          "description": "Unique ID of the persistent disk resource in AWS (Amazon EBS volume).\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n"
+        }
+      },
+      "description": "Represents a Persistent Disk resource in AWS.\n\nAn AWS EBS disk must exist before mounting to a container. The disk\nmust also be in the same AWS zone as the kubelet. An AWS EBS disk\ncan only be mounted as read/write once. AWS EBS volumes support\nownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.AzureDataDiskCachingMode": {
+      "type": "string"
+    },
+    "k8s.io.api.core.v1.AzureDataDiskKind": {
+      "type": "string"
+    },
+    "k8s.io.api.core.v1.AzureDiskVolumeSource": {
+      "properties": {
+        "cachingMode": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.AzureDataDiskCachingMode",
+          "description": "Host Caching mode: None, Read Only, Read Write.\n+optional\n"
+        },
+        "diskName": {
+          "type": "string",
+          "description": "The Name of the data disk in the blob storage\n"
+        },
+        "diskURI": {
+          "type": "string",
+          "description": "The URI the data disk in the blob storage\n"
+        },
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional\n"
+        },
+        "kind": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.AzureDataDiskKind",
+          "description": "Expected values Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        }
+      },
+      "description": "AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.\n"
+    },
+    "k8s.io.api.core.v1.AzureFileVolumeSource": {
+      "properties": {
+        "readOnly": {
+          "type": "boolean",
+          "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        },
+        "secretName": {
+          "type": "string",
+          "description": "the name of secret that contains Azure Storage Account Name and Key\n"
+        },
+        "shareName": {
+          "type": "string",
+          "description": "Share Name\n"
+        }
+      },
+      "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.\n"
+    },
+    "k8s.io.api.core.v1.CSIVolumeSource": {
+      "properties": {
+        "driver": {
+          "type": "string",
+          "description": "Driver is the name of the CSI driver that handles this volume.\nConsult with your admin for the correct name as registered in the cluster.\n"
+        },
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount. Ex. \"ext4\", \"xfs\", \"ntfs\".\nIf not provided, the empty value is passed to the associated CSI driver\nwhich will determine the default filesystem to apply.\n+optional\n"
+        },
+        "nodePublishSecretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "NodePublishSecretRef is a reference to the secret object containing\nsensitive information to pass to the CSI driver to complete the CSI\nNodePublishVolume and NodeUnpublishVolume calls.\nThis field is optional, and  may be empty if no secret is required. If the\nsecret object contains more than one secret, all secret references are passed.\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Specifies a read-only configuration for the volume.\nDefaults to false (read/write).\n+optional\n"
+        },
+        "volumeAttributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "VolumeAttributes stores driver-specific properties that are passed to the CSI\ndriver. Consult your driver's documentation for supported values.\n+optional\n"
+        }
+      },
+      "description": "Represents a source location of a volume to mount, managed by an external CSI driver\n"
+    },
+    "k8s.io.api.core.v1.Capabilities": {
+      "properties": {
+        "add": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.Capability"
+          },
+          "type": "array",
+          "description": "Added capabilities\n+optional\n"
+        },
+        "drop": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.Capability"
+          },
+          "type": "array",
+          "description": "Removed capabilities\n+optional\n"
+        }
+      },
+      "description": "Adds and removes POSIX capabilities from running containers.\n"
+    },
+    "k8s.io.api.core.v1.Capability": {
+      "type": "string",
+      "description": "Capability represent POSIX capabilities type\n"
+    },
+    "k8s.io.api.core.v1.CephFSVolumeSource": {
+      "properties": {
+        "monitors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Required: Monitors is a collection of Ceph monitors\nMore info: https://releases.k8s.io/HEAD/examples/volumes/cephfs/README.md#how-to-use-it\n"
+        },
+        "path": {
+          "type": "string",
+          "description": "Optional: Used as the mounted root, rather than the full Ceph tree, default is /\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/cephfs/README.md#how-to-use-it\n+optional\n"
+        },
+        "secretFile": {
+          "type": "string",
+          "description": "Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret\nMore info: https://releases.k8s.io/HEAD/examples/volumes/cephfs/README.md#how-to-use-it\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "Optional: SecretRef is reference to the authentication secret for User, default is empty.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/cephfs/README.md#how-to-use-it\n+optional\n"
+        },
+        "user": {
+          "type": "string",
+          "description": "Optional: User is the rados user name, default is admin\nMore info: https://releases.k8s.io/HEAD/examples/volumes/cephfs/README.md#how-to-use-it\n+optional\n"
+        }
+      },
+      "description": "Represents a Ceph Filesystem mount that lasts the lifetime of a pod\nCephfs volumes do not support ownership management or SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.CinderVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://releases.k8s.io/HEAD/examples/mysql-cinder-pd/README.md\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://releases.k8s.io/HEAD/examples/mysql-cinder-pd/README.md\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "Optional: points to a secret object containing parameters used to connect\nto OpenStack.\n+optional\n"
+        },
+        "volumeID": {
+          "type": "string",
+          "description": "volume id used to identify the volume in cinder\nMore info: https://releases.k8s.io/HEAD/examples/mysql-cinder-pd/README.md\n"
+        }
+      },
+      "description": "Represents a cinder volume resource in Openstack.\nA Cinder volume must exist before mounting to a container.\nThe volume must also be in the same region as the kubelet.\nCinder volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.ConditionStatus": {
+      "type": "string"
+    },
+    "k8s.io.api.core.v1.ConfigMapEnvSource": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the ConfigMap must be defined\n+optional\n"
+        }
+      },
+      "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment\nvariables with.\n\nThe contents of the target ConfigMap's Data field will represent the\nkey-value pairs as environment variables.\n"
+    },
+    "k8s.io.api.core.v1.ConfigMapKeySelector": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The key to select.\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the ConfigMap or it's key must be defined\n+optional\n"
+        }
+      },
+      "description": "Selects a key from a ConfigMap.\n"
+    },
+    "k8s.io.api.core.v1.ConfigMapProjection": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.KeyToPath"
+          },
+          "type": "array",
+          "description": "If unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the ConfigMap or it's keys must be defined\n+optional\n"
+        }
+      },
+      "description": "Adapts a ConfigMap into a projected volume.\n\nThe contents of the target ConfigMap's Data field will be presented in a\nprojected volume as files using the keys in the Data field as the file names,\nunless the items element is populated with specific mappings of keys to paths.\nNote that this is identical to a configmap volume source without the default\nmode.\n"
+    },
+    "k8s.io.api.core.v1.ConfigMapVolumeSource": {
+      "properties": {
+        "defaultMode": {
+          "type": "integer",
+          "description": "Optional: mode bits to use on created files by default. Must be a\nvalue between 0 and 0777. Defaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional\n"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.KeyToPath"
+          },
+          "type": "array",
+          "description": "If unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the ConfigMap or it's keys must be defined\n+optional\n"
+        }
+      },
+      "description": "Adapts a ConfigMap into a volume.\n\nThe contents of the target ConfigMap's Data field will be presented in a\nvolume as files using the keys in the Data field as the file names, unless\nthe items element is populated with specific mappings of keys to paths.\nConfigMap volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.Container": {
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Arguments to the entrypoint.\nThe docker image's CMD is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax\ncan be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,\nregardless of whether the variable exists or not.\nCannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional\n"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Entrypoint array. Not executed within a shell.\nThe docker image's ENTRYPOINT is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax\ncan be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,\nregardless of whether the variable exists or not.\nCannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional\n"
+        },
+        "env": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.EnvVar"
+          },
+          "type": "array",
+          "description": "List of environment variables to set in the container.\nCannot be updated.\n+optional\n+patchMergeKey=name\n+patchStrategy=merge\n"
+        },
+        "envFrom": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.EnvFromSource"
+          },
+          "type": "array",
+          "description": "List of sources to populate environment variables in the container.\nThe keys defined within a source must be a C_IDENTIFIER. All invalid keys\nwill be reported as an event when the container is starting. When a key exists in multiple\nsources, the value associated with the last source will take precedence.\nValues defined by an Env with a duplicate key will take precedence.\nCannot be updated.\n+optional\n"
+        },
+        "image": {
+          "type": "string",
+          "description": "Docker image name.\nMore info: https://kubernetes.io/docs/concepts/containers/images\nThis field is optional to allow higher level config management to default or override\ncontainer images in workload controllers like Deployments and StatefulSets.\n+optional\n"
+        },
+        "imagePullPolicy": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.PullPolicy",
+          "description": "Image pull policy.\nOne of Always, Never, IfNotPresent.\nDefaults to Always if :latest tag is specified, or IfNotPresent otherwise.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/containers/images#updating-images\n+optional\n"
+        },
+        "lifecycle": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Lifecycle",
+          "description": "Actions that the management system should take in response to container lifecycle events.\nCannot be updated.\n+optional\n"
+        },
+        "livenessProbe": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Probe",
+          "description": "Periodic probe of container liveness.\nContainer will be restarted if the probe fails.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the container specified as a DNS_LABEL.\nEach container in a pod must have a unique name (DNS_LABEL).\nCannot be updated.\n"
+        },
+        "ports": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.ContainerPort"
+          },
+          "type": "array",
+          "description": "List of ports to expose from the container. Exposing a port here gives\nthe system additional information about the network connections a\ncontainer uses, but is primarily informational. Not specifying a port here\nDOES NOT prevent that port from being exposed. Any port which is\nlistening on the default \"0.0.0.0\" address inside a container will be\naccessible from the network.\nCannot be updated.\n+optional\n+patchMergeKey=containerPort\n+patchStrategy=merge\n+listType=map\n+listMapKey=containerPort\n+listMapKey=protocol\n"
+        },
+        "readinessProbe": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Probe",
+          "description": "Periodic probe of container service readiness.\nContainer will be removed from service endpoints if the probe fails.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes\n+optional\n"
+        },
+        "resources": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ResourceRequirements",
+          "description": "Compute Resources required by this container.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/\n+optional\n"
+        },
+        "securityContext": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.SecurityContext",
+          "description": "Security options the pod should run with.\nMore info: https://kubernetes.io/docs/concepts/policy/security-context/\nMore info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/\n+optional\n"
+        },
+        "stdin": {
+          "type": "boolean",
+          "description": "Whether this container should allocate a buffer for stdin in the container runtime. If this\nis not set, reads from stdin in the container will always result in EOF.\nDefault is false.\n+optional\n"
+        },
+        "stdinOnce": {
+          "type": "boolean",
+          "description": "Whether the container runtime should close the stdin channel after it has been opened by\na single attach. When stdin is true the stdin stream will remain open across multiple attach\nsessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\nfirst client attaches to stdin, and then remains open and accepts data until the client disconnects,\nat which time stdin is closed and remains closed until the container is restarted. If this\nflag is false, a container processes that reads from stdin will never receive an EOF.\nDefault is false\n+optional\n"
+        },
+        "terminationMessagePath": {
+          "type": "string",
+          "description": "Optional: Path at which the file to which the container's termination message\nwill be written is mounted into the container's filesystem.\nMessage written is intended to be brief final status, such as an assertion failure message.\nWill be truncated by the node if greater than 4096 bytes. The total message length across\nall containers will be limited to 12kb.\nDefaults to /dev/termination-log.\nCannot be updated.\n+optional\n"
+        },
+        "terminationMessagePolicy": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.TerminationMessagePolicy",
+          "description": "Indicate how the termination message should be populated. File will use the contents of\nterminationMessagePath to populate the container status message on both success and failure.\nFallbackToLogsOnError will use the last chunk of container log output if the termination\nmessage file is empty and the container exited with an error.\nThe log output is limited to 2048 bytes or 80 lines, whichever is smaller.\nDefaults to File.\nCannot be updated.\n+optional\n"
+        },
+        "tty": {
+          "type": "boolean",
+          "description": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.\nDefault is false.\n+optional\n"
+        },
+        "volumeDevices": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.VolumeDevice"
+          },
+          "type": "array",
+          "description": "volumeDevices is the list of block devices to be used by the container.\nThis is a beta feature.\n+patchMergeKey=devicePath\n+patchStrategy=merge\n+optional\n"
+        },
+        "volumeMounts": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.VolumeMount"
+          },
+          "type": "array",
+          "description": "Pod volumes to mount into the container's filesystem.\nCannot be updated.\n+optional\n+patchMergeKey=mountPath\n+patchStrategy=merge\n"
+        },
+        "workingDir": {
+          "type": "string",
+          "description": "Container's working directory.\nIf not specified, the container runtime's default will be used, which\nmight be configured in the container image.\nCannot be updated.\n+optional\n"
+        }
+      },
+      "description": "A single application container that you want to run within a pod.\n"
+    },
+    "k8s.io.api.core.v1.ContainerPort": {
+      "properties": {
+        "containerPort": {
+          "type": "integer",
+          "description": "Number of port to expose on the pod's IP address.\nThis must be a valid port number, 0 \u003c x \u003c 65536.\n"
+        },
+        "hostIP": {
+          "type": "string",
+          "description": "What host IP to bind the external port to.\n+optional\n"
+        },
+        "hostPort": {
+          "type": "integer",
+          "description": "Number of port to expose on the host.\nIf specified, this must be a valid port number, 0 \u003c x \u003c 65536.\nIf HostNetwork is specified, this must match ContainerPort.\nMost containers do not need this.\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "If specified, this must be an IANA_SVC_NAME and unique within the pod. Each\nnamed port in a pod must have a unique name. Name for the port that can be\nreferred to by services.\n+optional\n"
+        },
+        "protocol": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Protocol",
+          "description": "Protocol for port. Must be UDP, TCP, or SCTP.\nDefaults to \"TCP\".\n+optional\n"
+        }
+      },
+      "description": "ContainerPort represents a network port in a single container.\n"
+    },
+    "k8s.io.api.core.v1.DownwardAPIProjection": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.DownwardAPIVolumeFile"
+          },
+          "type": "array",
+          "description": "Items is a list of DownwardAPIVolume file\n+optional\n"
+        }
+      },
+      "description": "Represents downward API info for projecting into a projected volume.\nNote that this is identical to a downwardAPI volume source without the default\nmode.\n"
+    },
+    "k8s.io.api.core.v1.DownwardAPIVolumeFile": {
+      "properties": {
+        "fieldRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ObjectFieldSelector",
+          "description": "Required: Selects a field of the pod: only annotations, labels, name and namespace are supported.\n+optional\n"
+        },
+        "mode": {
+          "type": "integer",
+          "description": "Optional: mode bits to use on this file, must be a value between 0\nand 0777. If not specified, the volume defaultMode will be used.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional\n"
+        },
+        "path": {
+          "type": "string",
+          "description": "Required: Path is  the relative path name of the file to be created. Must not be absolute or contain the '..' path. Must be utf-8 encoded. The first item of the relative path must not start with '..'\n"
+        },
+        "resourceFieldRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ResourceFieldSelector",
+          "description": "Selects a resource of the container: only resources limits and requests\n(limits.cpu, limits.memory, requests.cpu and requests.memory) are currently supported.\n+optional\n"
+        }
+      },
+      "description": "DownwardAPIVolumeFile represents information to create the file containing the pod field\n"
+    },
+    "k8s.io.api.core.v1.DownwardAPIVolumeSource": {
+      "properties": {
+        "defaultMode": {
+          "type": "integer",
+          "description": "Optional: mode bits to use on created files by default. Must be a\nvalue between 0 and 0777. Defaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional\n"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.DownwardAPIVolumeFile"
+          },
+          "type": "array",
+          "description": "Items is a list of downward API volume file\n+optional\n"
+        }
+      },
+      "description": "DownwardAPIVolumeSource represents a volume containing downward API info.\nDownward API volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.EmptyDirVolumeSource": {
+      "properties": {
+        "medium": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.StorageMedium",
+          "description": "What type of storage medium should back this directory.\nThe default is \"\" which means to use the node's default medium.\nMust be an empty string (default) or Memory.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional\n"
+        },
+        "sizeLimit": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.api.resource.Quantity",
+          "description": "Total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: http://kubernetes.io/docs/user-guide/volumes#emptydir\n+optional\n"
+        }
+      },
+      "description": "Represents an empty directory for a pod.\nEmpty directory volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.EnvFromSource": {
+      "properties": {
+        "configMapRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ConfigMapEnvSource",
+          "description": "The ConfigMap to select from\n+optional\n"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.SecretEnvSource",
+          "description": "The Secret to select from\n+optional\n"
+        }
+      },
+      "description": "EnvFromSource represents the source of a set of ConfigMaps\n"
+    },
+    "k8s.io.api.core.v1.EnvVar": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the environment variable. Must be a C_IDENTIFIER.\n"
+        },
+        "value": {
+          "type": "string",
+          "description": "Variable references $(VAR_NAME) are expanded\nusing the previous defined environment variables in the container and\nany service environment variables. If a variable cannot be resolved,\nthe reference in the input string will be unchanged. The $(VAR_NAME)\nsyntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped\nreferences will never be expanded, regardless of whether the variable\nexists or not.\nDefaults to \"\".\n+optional\n"
+        },
+        "valueFrom": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.EnvVarSource",
+          "description": "Source for the environment variable's value. Cannot be used if value is not empty.\n+optional\n"
+        }
+      },
+      "description": "EnvVar represents an environment variable present in a Container.\n"
+    },
+    "k8s.io.api.core.v1.EnvVarSource": {
+      "properties": {
+        "configMapKeyRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ConfigMapKeySelector",
+          "description": "Selects a key of a ConfigMap.\n+optional\n"
+        },
+        "fieldRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ObjectFieldSelector",
+          "description": "Selects a field of the pod: supports metadata.name, metadata.namespace, metadata.labels, metadata.annotations,\nspec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP.\n+optional\n"
+        },
+        "resourceFieldRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ResourceFieldSelector",
+          "description": "Selects a resource of the container: only resources limits and requests\n(limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.\n+optional\n"
+        },
+        "secretKeyRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.SecretKeySelector",
+          "description": "Selects a key of a secret in the pod's namespace\n+optional\n"
+        }
+      },
+      "description": "EnvVarSource represents a source for the value of an EnvVar.\n"
+    },
+    "k8s.io.api.core.v1.ExecAction": {
+      "properties": {
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Command is the command line to execute inside the container, the working directory for the\ncommand  is root ('/') in the container's filesystem. The command is simply exec'd, it is\nnot run inside a shell, so traditional shell instructions ('|', etc) won't work. To use\na shell, you need to explicitly call out to that shell.\nExit status of 0 is treated as live/healthy and non-zero is unhealthy.\n+optional\n"
+        }
+      },
+      "description": "ExecAction describes a \"run in container\" action.\n"
+    },
+    "k8s.io.api.core.v1.FCVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional\n"
+        },
+        "lun": {
+          "type": "integer",
+          "description": "Optional: FC target lun number\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        },
+        "targetWWNs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Optional: FC target worldwide names (WWNs)\n+optional\n"
+        },
+        "wwids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Optional: FC volume world wide identifiers (wwids)\nEither wwids or combination of targetWWNs and lun must be set, but not both simultaneously.\n+optional\n"
+        }
+      },
+      "description": "Represents a Fibre Channel volume.\nFibre Channel volumes can only be mounted as read/write once.\nFibre Channel volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.FlexVolumeSource": {
+      "properties": {
+        "driver": {
+          "type": "string",
+          "description": "Driver is the name of the driver to use for this volume.\n"
+        },
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". The default filesystem depends on FlexVolume script.\n+optional\n"
+        },
+        "options": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Optional: Extra command options if any.\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "Optional: SecretRef is reference to the secret object containing\nsensitive information to pass to the plugin scripts. This may be\nempty if no secret object is specified. If the secret object\ncontains more than one secret, all secrets are passed to the plugin\nscripts.\n+optional\n"
+        }
+      },
+      "description": "FlexVolume represents a generic volume resource that is\nprovisioned/attached using an exec based plugin.\n"
+    },
+    "k8s.io.api.core.v1.FlockerVolumeSource": {
+      "properties": {
+        "datasetName": {
+          "type": "string",
+          "description": "Name of the dataset stored as metadata -\u003e name on the dataset for Flocker\nshould be considered as deprecated\n+optional\n"
+        },
+        "datasetUUID": {
+          "type": "string",
+          "description": "UUID of the dataset. This is unique identifier of a Flocker dataset\n+optional\n"
+        }
+      },
+      "description": "Represents a Flocker volume mounted by the Flocker agent.\nOne and only one of datasetName and datasetUUID should be set.\nFlocker volumes do not support ownership management or SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.GCEPersistentDiskVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional\n"
+        },
+        "partition": {
+          "type": "integer",
+          "description": "The partition in the volume that you want to mount.\nIf omitted, the default is to mount by volume name.\nExamples: For volume /dev/sda1, you specify the partition as \"1\".\nSimilarly, the volume partition for /dev/sda is \"0\" (or you can leave the property empty).\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional\n"
+        },
+        "pdName": {
+          "type": "string",
+          "description": "Unique name of the PD resource in GCE. Used to identify the disk in GCE.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional\n"
+        }
+      },
+      "description": "Represents a Persistent Disk resource in Google Compute Engine.\n\nA GCE PD must exist before mounting to a container. The disk must\nalso be in the same GCE project and zone as the kubelet. A GCE PD\ncan only be mounted as read/write once or read-only many times. GCE\nPDs support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.GitRepoVolumeSource": {
+      "properties": {
+        "directory": {
+          "type": "string",
+          "description": "Target directory name.\nMust not contain or start with '..'.  If '.' is supplied, the volume directory will be the\ngit repository.  Otherwise, if specified, the volume will contain the git repository in\nthe subdirectory with the given name.\n+optional\n"
+        },
+        "repository": {
+          "type": "string",
+          "description": "Repository URL\n"
+        },
+        "revision": {
+          "type": "string",
+          "description": "Commit hash for the specified revision.\n+optional\n"
+        }
+      },
+      "description": "Represents a volume that is populated with the contents of a git repository.\nGit repo volumes do not support ownership management.\nGit repo volumes support SELinux relabeling.\n\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an\nEmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir\ninto the Pod's container.\n"
+    },
+    "k8s.io.api.core.v1.GlusterfsVolumeSource": {
+      "properties": {
+        "endpoints": {
+          "type": "string",
+          "description": "EndpointsName is the endpoint name that details Glusterfs topology.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/glusterfs/README.md#create-a-pod\n"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path is the Glusterfs volume path.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/glusterfs/README.md#create-a-pod\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/glusterfs/README.md#create-a-pod\n+optional\n"
+        }
+      },
+      "description": "Represents a Glusterfs mount that lasts the lifetime of a pod.\nGlusterfs volumes do not support ownership management or SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.HTTPGetAction": {
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Host name to connect to, defaults to the pod IP. You probably want to set\n\"Host\" in httpHeaders instead.\n+optional\n"
+        },
+        "httpHeaders": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.HTTPHeader"
+          },
+          "type": "array",
+          "description": "Custom headers to set in the request. HTTP allows repeated headers.\n+optional\n"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to access on the HTTP server.\n+optional\n"
+        },
+        "port": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.util.intstr.IntOrString",
+          "description": "Name or number of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.\n"
+        },
+        "scheme": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.URIScheme",
+          "description": "Scheme to use for connecting to the host.\nDefaults to HTTP.\n+optional\n"
+        }
+      },
+      "description": "HTTPGetAction describes an action based on HTTP Get requests.\n"
+    },
+    "k8s.io.api.core.v1.HTTPHeader": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The header field name\n"
+        },
+        "value": {
+          "type": "string",
+          "description": "The header field value\n"
+        }
+      },
+      "description": "HTTPHeader describes a custom header to be used in HTTP probes\n"
+    },
+    "k8s.io.api.core.v1.Handler": {
+      "properties": {
+        "exec": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ExecAction",
+          "description": "One and only one of the following should be specified.\nExec specifies the action to take.\n+optional\n"
+        },
+        "httpGet": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.HTTPGetAction",
+          "description": "HTTPGet specifies the http request to perform.\n+optional\n"
+        },
+        "tcpSocket": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.TCPSocketAction",
+          "description": "TCPSocket specifies an action involving a TCP port.\nTCP hooks not yet supported\nTODO: implement a realistic TCP lifecycle hook\n+optional\n"
+        }
+      },
+      "description": "Handler defines a specific action that should be taken\nTODO: pass structured data to these actions, and document that data here.\n"
+    },
+    "k8s.io.api.core.v1.HostPathType": {
+      "type": "string"
+    },
+    "k8s.io.api.core.v1.HostPathVolumeSource": {
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path of the directory on the host.\nIf the path is a symlink, it will follow the link to the real path.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n"
+        },
+        "type": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.HostPathType",
+          "description": "Type for HostPath Volume\nDefaults to \"\"\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n+optional\n"
+        }
+      },
+      "description": "Represents a host path mapped into a pod.\nHost path volumes do not support ownership management or SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.ISCSIVolumeSource": {
+      "properties": {
+        "chapAuthDiscovery": {
+          "type": "boolean",
+          "description": "whether support iSCSI Discovery CHAP authentication\n+optional\n"
+        },
+        "chapAuthSession": {
+          "type": "boolean",
+          "description": "whether support iSCSI Session CHAP authentication\n+optional\n"
+        },
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional\n"
+        },
+        "initiatorName": {
+          "type": "string",
+          "description": "Custom iSCSI Initiator Name.\nIf initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface\n\u003ctarget portal\u003e:\u003cvolume name\u003e will be created for the connection.\n+optional\n"
+        },
+        "iqn": {
+          "type": "string",
+          "description": "Target iSCSI Qualified Name.\n"
+        },
+        "iscsiInterface": {
+          "type": "string",
+          "description": "iSCSI Interface Name that uses an iSCSI transport.\nDefaults to 'default' (tcp).\n+optional\n"
+        },
+        "lun": {
+          "type": "integer",
+          "description": "iSCSI Target Lun number.\n"
+        },
+        "portals": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "CHAP Secret for iSCSI target and initiator authentication\n+optional\n"
+        },
+        "targetPortal": {
+          "type": "string",
+          "description": "iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).\n"
+        }
+      },
+      "description": "Represents an ISCSI disk.\nISCSI volumes can only be mounted as read/write once.\nISCSI volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.KeyToPath": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The key to project.\n"
+        },
+        "mode": {
+          "type": "integer",
+          "description": "Optional: mode bits to use on this file, must be a value between 0\nand 0777. If not specified, the volume defaultMode will be used.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional\n"
+        },
+        "path": {
+          "type": "string",
+          "description": "The relative path of the file to map the key to.\nMay not be an absolute path.\nMay not contain the path element '..'.\nMay not start with the string '..'.\n"
+        }
+      },
+      "description": "Maps a string key to a path within a volume.\n"
+    },
+    "k8s.io.api.core.v1.Lifecycle": {
+      "properties": {
+        "postStart": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Handler",
+          "description": "PostStart is called immediately after a container is created. If the handler fails,\nthe container is terminated and restarted according to its restart policy.\nOther management of the container blocks until the hook completes.\nMore info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks\n+optional\n"
+        },
+        "preStop": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Handler",
+          "description": "PreStop is called immediately before a container is terminated due to an\nAPI request or management event such as liveness probe failure,\npreemption, resource contention, etc. The handler is not called if the\ncontainer crashes or exits. The reason for termination is passed to the\nhandler. The Pod's termination grace period countdown begins before the\nPreStop hooked is executed. Regardless of the outcome of the handler, the\ncontainer will eventually terminate within the Pod's termination grace\nperiod. Other management of the container blocks until the hook completes\nor until the termination grace period is reached.\nMore info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks\n+optional\n"
+        }
+      },
+      "description": "Lifecycle describes actions that the management system should take in response to container lifecycle\nevents. For the PostStart and PreStop lifecycle handlers, management of the container blocks\nuntil the action is complete, unless the container process fails, in which case the handler is aborted.\n"
+    },
+    "k8s.io.api.core.v1.LocalObjectReference": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        }
+      },
+      "description": "LocalObjectReference contains enough information to let you locate the\nreferenced object inside the same namespace.\n"
+    },
+    "k8s.io.api.core.v1.MountPropagationMode": {
+      "type": "string",
+      "description": "MountPropagationMode describes mount propagation.\n"
+    },
+    "k8s.io.api.core.v1.NFSVolumeSource": {
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path that is exported by the NFS server.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "ReadOnly here will force\nthe NFS export to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional\n"
+        },
+        "server": {
+          "type": "string",
+          "description": "Server is the hostname or IP address of the NFS server.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n"
+        }
+      },
+      "description": "Represents an NFS mount that lasts the lifetime of a pod.\nNFS volumes do not support ownership management or SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.ObjectFieldSelector": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "Version of the schema the FieldPath is written in terms of, defaults to \"v1\".\n+optional\n"
+        },
+        "fieldPath": {
+          "type": "string",
+          "description": "Path of the field to select in the specified API version.\n"
+        }
+      },
+      "description": "ObjectFieldSelector selects an APIVersioned field of an object.\n"
+    },
+    "k8s.io.api.core.v1.ObjectReference": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "API version of the referent.\n+optional\n"
+        },
+        "fieldPath": {
+          "type": "string",
+          "description": "If referring to a piece of an object instead of an entire object, this string\nshould contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].\nFor example, if the object reference is to a container within a pod, this would take on a value like:\n\"spec.containers{name}\" (where \"name\" refers to the name of the container that triggered\nthe event) or if no container name is specified \"spec.containers[2]\" (container with\nindex 2 in this pod). This syntax is chosen only to have some well-defined way of\nreferencing a part of an object.\nTODO: this design is not final and this field is subject to change in the future.\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind of the referent.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n+optional\n"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/\n+optional\n"
+        },
+        "resourceVersion": {
+          "type": "string",
+          "description": "Specific resourceVersion to which this reference is made, if any.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency\n+optional\n"
+        },
+        "uid": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.types.UID",
+          "description": "UID of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids\n+optional\n"
+        }
+      },
+      "description": "ObjectReference contains enough information to let you inspect or modify the referred object.\n+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n"
+    },
+    "k8s.io.api.core.v1.PersistentVolumeClaimVolumeSource": {
+      "properties": {
+        "claimName": {
+          "type": "string",
+          "description": "ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Will force the ReadOnly setting in VolumeMounts.\nDefault false.\n+optional\n"
+        }
+      },
+      "description": "PersistentVolumeClaimVolumeSource references the user's PVC in the same namespace.\nThis volume finds the bound PV and mounts that volume for the pod. A\nPersistentVolumeClaimVolumeSource is, essentially, a wrapper around another\ntype of volume that is owned by someone else (the system).\n"
+    },
+    "k8s.io.api.core.v1.PhotonPersistentDiskVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n"
+        },
+        "pdID": {
+          "type": "string",
+          "description": "ID that identifies Photon Controller persistent disk\n"
+        }
+      },
+      "description": "Represents a Photon Controller persistent disk resource.\n"
+    },
+    "k8s.io.api.core.v1.PortworxVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "FSType represents the filesystem type to mount\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\". Implicitly inferred to be \"ext4\" if unspecified.\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        },
+        "volumeID": {
+          "type": "string",
+          "description": "VolumeID uniquely identifies a Portworx volume\n"
+        }
+      },
+      "description": "PortworxVolumeSource represents a Portworx volume resource.\n"
+    },
+    "k8s.io.api.core.v1.Probe": {
+      "properties": {
+        "exec": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ExecAction",
+          "description": "One and only one of the following should be specified.\nExec specifies the action to take.\n+optional\n"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "description": "Minimum consecutive failures for the probe to be considered failed after having succeeded.\nDefaults to 3. Minimum value is 1.\n+optional\n"
+        },
+        "httpGet": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.HTTPGetAction",
+          "description": "HTTPGet specifies the http request to perform.\n+optional\n"
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "description": "Number of seconds after the container has started before liveness probes are initiated.\nMore info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes\n+optional\n"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "description": "How often (in seconds) to perform the probe.\nDefault to 10 seconds. Minimum value is 1.\n+optional\n"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "description": "Minimum consecutive successes for the probe to be considered successful after having failed.\nDefaults to 1. Must be 1 for liveness. Minimum value is 1.\n+optional\n"
+        },
+        "tcpSocket": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.TCPSocketAction",
+          "description": "TCPSocket specifies an action involving a TCP port.\nTCP hooks not yet supported\nTODO: implement a realistic TCP lifecycle hook\n+optional\n"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "description": "Number of seconds after which the probe times out.\nDefaults to 1 second. Minimum value is 1.\nMore info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes\n+optional\n"
+        }
+      },
+      "description": "Probe describes a health check to be performed against a container to determine whether it is\nalive or ready to receive traffic.\n"
+    },
+    "k8s.io.api.core.v1.ProcMountType": {
+      "type": "string"
+    },
+    "k8s.io.api.core.v1.ProjectedVolumeSource": {
+      "properties": {
+        "defaultMode": {
+          "type": "integer",
+          "description": "Mode bits to use on created files by default. Must be a value between\n0 and 0777.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional\n"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.VolumeProjection"
+          },
+          "type": "array",
+          "description": "list of volume projections\n"
+        }
+      },
+      "description": "Represents a projected volume source\n"
+    },
+    "k8s.io.api.core.v1.Protocol": {
+      "type": "string",
+      "description": "Protocol defines network protocols supported for things like container ports.\n"
+    },
+    "k8s.io.api.core.v1.PullPolicy": {
+      "type": "string",
+      "description": "PullPolicy describes a policy for if/when to pull a container image\n"
+    },
+    "k8s.io.api.core.v1.QuobyteVolumeSource": {
+      "properties": {
+        "group": {
+          "type": "string",
+          "description": "Group to map volume access to\nDefault is no group\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "ReadOnly here will force the Quobyte volume to be mounted with read-only permissions.\nDefaults to false.\n+optional\n"
+        },
+        "registry": {
+          "type": "string",
+          "description": "Registry represents a single or multiple Quobyte Registry services\nspecified as a string as host:port pair (multiple entries are separated with commas)\nwhich acts as the central registry for volumes\n"
+        },
+        "tenant": {
+          "type": "string",
+          "description": "Tenant owning the given Quobyte volume in the Backend\nUsed with dynamically provisioned Quobyte volumes, value is set by the plugin\n+optional\n"
+        },
+        "user": {
+          "type": "string",
+          "description": "User to map volume access to\nDefaults to serivceaccount user\n+optional\n"
+        },
+        "volume": {
+          "type": "string",
+          "description": "Volume is a string that references an already created Quobyte volume by name.\n"
+        }
+      },
+      "description": "Represents a Quobyte mount that lasts the lifetime of a pod.\nQuobyte volumes do not support ownership management or SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.RBDVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#rbd\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional\n"
+        },
+        "image": {
+          "type": "string",
+          "description": "The rados image name.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n"
+        },
+        "keyring": {
+          "type": "string",
+          "description": "Keyring is the path to key ring for RBDUser.\nDefault is /etc/ceph/keyring.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n+optional\n"
+        },
+        "monitors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "A collection of Ceph monitors.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n"
+        },
+        "pool": {
+          "type": "string",
+          "description": "The rados pool name.\nDefault is rbd.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "SecretRef is name of the authentication secret for RBDUser. If provided\noverrides keyring.\nDefault is nil.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n+optional\n"
+        },
+        "user": {
+          "type": "string",
+          "description": "The rados user name.\nDefault is admin.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md#how-to-use-it\n+optional\n"
+        }
+      },
+      "description": "Represents a Rados Block Device mount that lasts the lifetime of a pod.\nRBD volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.ResourceFieldSelector": {
+      "properties": {
+        "containerName": {
+          "type": "string",
+          "description": "Container name: required for volumes, optional for env vars\n+optional\n"
+        },
+        "divisor": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.api.resource.Quantity",
+          "description": "Specifies the output format of the exposed resources, defaults to \"1\"\n+optional\n"
+        },
+        "resource": {
+          "type": "string",
+          "description": "Required: resource to select\n"
+        }
+      },
+      "description": "ResourceFieldSelector represents container resources (cpu, memory) and their output format\n"
+    },
+    "k8s.io.api.core.v1.ResourceList": {
+      "type": "object",
+      "description": "ResourceList is a set of (resource name, quantity) pairs.\n"
+    },
+    "k8s.io.api.core.v1.ResourceRequirements": {
+      "properties": {
+        "limits": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ResourceList",
+          "description": "Limits describes the maximum amount of compute resources allowed.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/\n+optional\n"
+        },
+        "requests": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ResourceList",
+          "description": "Requests describes the minimum amount of compute resources required.\nIf Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\notherwise to an implementation-defined value.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/\n+optional\n"
+        }
+      },
+      "description": "ResourceRequirements describes the compute resource requirements.\n"
+    },
+    "k8s.io.api.core.v1.SELinuxOptions": {
+      "properties": {
+        "level": {
+          "type": "string",
+          "description": "Level is SELinux level label that applies to the container.\n+optional\n"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role is a SELinux role label that applies to the container.\n+optional\n"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type is a SELinux type label that applies to the container.\n+optional\n"
+        },
+        "user": {
+          "type": "string",
+          "description": "User is a SELinux user label that applies to the container.\n+optional\n"
+        }
+      },
+      "description": "SELinuxOptions are the labels to be applied to the container\n"
+    },
+    "k8s.io.api.core.v1.ScaleIOVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\".\nDefault is \"xfs\".\n+optional\n"
+        },
+        "gateway": {
+          "type": "string",
+          "description": "The host address of the ScaleIO API Gateway.\n"
+        },
+        "protectionDomain": {
+          "type": "string",
+          "description": "The name of the ScaleIO Protection Domain for the configured storage.\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "SecretRef references to the secret for ScaleIO user and other\nsensitive information. If this is not provided, Login operation will fail.\n"
+        },
+        "sslEnabled": {
+          "type": "boolean",
+          "description": "Flag to enable/disable SSL communication with Gateway, default false\n+optional\n"
+        },
+        "storageMode": {
+          "type": "string",
+          "description": "Indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.\nDefault is ThinProvisioned.\n+optional\n"
+        },
+        "storagePool": {
+          "type": "string",
+          "description": "The ScaleIO Storage Pool associated with the protection domain.\n+optional\n"
+        },
+        "system": {
+          "type": "string",
+          "description": "The name of the storage system as configured in ScaleIO.\n"
+        },
+        "volumeName": {
+          "type": "string",
+          "description": "The name of a volume already created in the ScaleIO system\nthat is associated with this volume source.\n"
+        }
+      },
+      "description": "ScaleIOVolumeSource represents a persistent ScaleIO volume\n"
+    },
+    "k8s.io.api.core.v1.SecretEnvSource": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the Secret must be defined\n+optional\n"
+        }
+      },
+      "description": "SecretEnvSource selects a Secret to populate the environment\nvariables with.\n\nThe contents of the target Secret's Data field will represent the\nkey-value pairs as environment variables.\n"
+    },
+    "k8s.io.api.core.v1.SecretKeySelector": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The key of the secret to select from.  Must be a valid secret key.\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the Secret or it's key must be defined\n+optional\n"
+        }
+      },
+      "description": "SecretKeySelector selects a key of a Secret.\n"
+    },
+    "k8s.io.api.core.v1.SecretProjection": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.KeyToPath"
+          },
+          "type": "array",
+          "description": "If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\nTODO: Add other useful fields. apiVersion, kind, uid?\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the Secret or its key must be defined\n+optional\n"
+        }
+      },
+      "description": "Adapts a secret into a projected volume.\n\nThe contents of the target Secret's Data field will be presented in a\nprojected volume as files using the keys in the Data field as the file names.\nNote that this is identical to a secret volume source without the default\nmode.\n"
+    },
+    "k8s.io.api.core.v1.SecretVolumeSource": {
+      "properties": {
+        "defaultMode": {
+          "type": "integer",
+          "description": "Optional: mode bits to use on created files by default. Must be a\nvalue between 0 and 0777. Defaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional\n"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.api.core.v1.KeyToPath"
+          },
+          "type": "array",
+          "description": "If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional\n"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "Specify whether the Secret or it's keys must be defined\n+optional\n"
+        },
+        "secretName": {
+          "type": "string",
+          "description": "Name of the secret in the pod's namespace to use.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#secret\n+optional\n"
+        }
+      },
+      "description": "Adapts a Secret into a volume.\n\nThe contents of the target Secret's Data field will be presented in a volume\nas files using the keys in the Data field as the file names.\nSecret volumes support ownership management and SELinux relabeling.\n"
+    },
+    "k8s.io.api.core.v1.SecurityContext": {
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "type": "boolean",
+          "description": "AllowPrivilegeEscalation controls whether a process can gain more\nprivileges than its parent process. This bool directly controls if\nthe no_new_privs flag will be set on the container process.\nAllowPrivilegeEscalation is true always when the container is:\n1) run as Privileged\n2) has CAP_SYS_ADMIN\n+optional\n"
+        },
+        "capabilities": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.Capabilities",
+          "description": "The capabilities to add/drop when running containers.\nDefaults to the default set of capabilities granted by the container runtime.\n+optional\n"
+        },
+        "privileged": {
+          "type": "boolean",
+          "description": "Run container in privileged mode.\nProcesses in privileged containers are essentially equivalent to root on the host.\nDefaults to false.\n+optional\n"
+        },
+        "procMount": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ProcMountType",
+          "description": "procMount denotes the type of proc mount to use for the containers.\nThe default is DefaultProcMount which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\n+optional\n"
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "description": "Whether this container has a read-only root filesystem.\nDefault is false.\n+optional\n"
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "The GID to run the entrypoint of the container process.\nUses runtime default if unset.\nMay also be set in PodSecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional\n"
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Indicates that the container must run as a non-root user.\nIf true, the Kubelet will validate the image at runtime to ensure that it\ndoes not run as UID 0 (root) and fail to start the container if it does.\nIf unset or false, no such validation will be performed.\nMay also be set in PodSecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional\n"
+        },
+        "runAsUser": {
+          "type": "integer",
+          "description": "The UID to run the entrypoint of the container process.\nDefaults to user specified in image metadata if unspecified.\nMay also be set in PodSecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional\n"
+        },
+        "seLinuxOptions": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.SELinuxOptions",
+          "description": "The SELinux context to be applied to the container.\nIf unspecified, the container runtime will allocate a random SELinux context for each\ncontainer.  May also be set in PodSecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional\n"
+        }
+      },
+      "description": "SecurityContext holds security configuration that will be applied to a container.\nSome fields are present in both SecurityContext and PodSecurityContext.  When both\nare set, the values in SecurityContext take precedence.\n"
+    },
+    "k8s.io.api.core.v1.ServiceAccountTokenProjection": {
+      "properties": {
+        "audience": {
+          "type": "string",
+          "description": "Audience is the intended audience of the token. A recipient of a token\nmust identify itself with an identifier specified in the audience of the\ntoken, and otherwise should reject the token. The audience defaults to the\nidentifier of the apiserver.\n+optional\n"
+        },
+        "expirationSeconds": {
+          "type": "integer",
+          "description": "ExpirationSeconds is the requested duration of validity of the service\naccount token. As the token approaches expiration, the kubelet volume\nplugin will proactively rotate the service account token. The kubelet will\nstart trying to rotate the token if the token is older than 80 percent of\nits time to live or if the token is older than 24 hours.Defaults to 1 hour\nand must be at least 10 minutes.\n+optional\n"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path is the path relative to the mount point of the file to project the\ntoken into.\n"
+        }
+      },
+      "description": "ServiceAccountTokenProjection represents a projected service account token\nvolume. This projection can be used to insert a service account token into\nthe pods runtime filesystem for use against APIs (Kubernetes API Server or\notherwise).\n"
+    },
+    "k8s.io.api.core.v1.StorageMedium": {
+      "type": "string",
+      "description": "StorageMedium defines ways that storage can be allocated to a volume.\n"
+    },
+    "k8s.io.api.core.v1.StorageOSVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional\n"
+        },
+        "secretRef": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.LocalObjectReference",
+          "description": "SecretRef specifies the secret to use for obtaining the StorageOS API\ncredentials.  If not specified, default values will be attempted.\n+optional\n"
+        },
+        "volumeName": {
+          "type": "string",
+          "description": "VolumeName is the human-readable name of the StorageOS volume.  Volume\nnames are only unique within a namespace.\n"
+        },
+        "volumeNamespace": {
+          "type": "string",
+          "description": "VolumeNamespace specifies the scope of the volume within StorageOS.  If no\nnamespace is specified then the Pod's namespace will be used.  This allows the\nKubernetes name scoping to be mirrored within StorageOS for tighter integration.\nSet VolumeName to any name to override the default behaviour.\nSet to \"default\" if you are not using namespaces within StorageOS.\nNamespaces that do not pre-exist within StorageOS will be created.\n+optional\n"
+        }
+      },
+      "description": "Represents a StorageOS persistent volume resource.\n"
+    },
+    "k8s.io.api.core.v1.TCPSocketAction": {
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Optional: Host name to connect to, defaults to the pod IP.\n+optional\n"
+        },
+        "port": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.util.intstr.IntOrString",
+          "description": "Number or name of the port to access on the container.\nNumber must be in the range 1 to 65535.\nName must be an IANA_SVC_NAME.\n"
+        }
+      },
+      "description": "TCPSocketAction describes an action based on opening a socket\n"
+    },
+    "k8s.io.api.core.v1.TerminationMessagePolicy": {
+      "type": "string",
+      "description": "TerminationMessagePolicy describes how termination messages are retrieved from a container.\n"
+    },
+    "k8s.io.api.core.v1.URIScheme": {
+      "type": "string",
+      "description": "URIScheme identifies the scheme used for connection to a host for Get actions\n"
+    },
+    "k8s.io.api.core.v1.Volume": {
+      "properties": {
+        "awsElasticBlockStore": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.AWSElasticBlockStoreVolumeSource",
+          "description": "AWSElasticBlockStore represents an AWS Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional\n"
+        },
+        "azureDisk": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.AzureDiskVolumeSource",
+          "description": "AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.\n+optional\n"
+        },
+        "azureFile": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.AzureFileVolumeSource",
+          "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.\n+optional\n"
+        },
+        "cephfs": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.CephFSVolumeSource",
+          "description": "CephFS represents a Ceph FS mount on the host that shares a pod's lifetime\n+optional\n"
+        },
+        "cinder": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.CinderVolumeSource",
+          "description": "Cinder represents a cinder volume attached and mounted on kubelets host machine\nMore info: https://releases.k8s.io/HEAD/examples/mysql-cinder-pd/README.md\n+optional\n"
+        },
+        "configMap": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ConfigMapVolumeSource",
+          "description": "ConfigMap represents a configMap that should populate this volume\n+optional\n"
+        },
+        "csi": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.CSIVolumeSource",
+          "description": "CSI (Container Storage Interface) represents storage that is handled by an external CSI driver (Alpha feature).\n+optional\n"
+        },
+        "downwardAPI": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.DownwardAPIVolumeSource",
+          "description": "DownwardAPI represents downward API about the pod that should populate this volume\n+optional\n"
+        },
+        "emptyDir": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.EmptyDirVolumeSource",
+          "description": "EmptyDir represents a temporary directory that shares a pod's lifetime.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional\n"
+        },
+        "fc": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.FCVolumeSource",
+          "description": "FC represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to the pod.\n+optional\n"
+        },
+        "flexVolume": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.FlexVolumeSource",
+          "description": "FlexVolume represents a generic volume resource that is\nprovisioned/attached using an exec based plugin.\n+optional\n"
+        },
+        "flocker": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.FlockerVolumeSource",
+          "description": "Flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running\n+optional\n"
+        },
+        "gcePersistentDisk": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.GCEPersistentDiskVolumeSource",
+          "description": "GCEPersistentDisk represents a GCE Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional\n"
+        },
+        "gitRepo": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.GitRepoVolumeSource",
+          "description": "GitRepo represents a git repository at a particular revision.\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an\nEmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir\ninto the Pod's container.\n+optional\n"
+        },
+        "glusterfs": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.GlusterfsVolumeSource",
+          "description": "Glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/glusterfs/README.md\n+optional\n"
+        },
+        "hostPath": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.HostPathVolumeSource",
+          "description": "HostPath represents a pre-existing file or directory on the host\nmachine that is directly exposed to the container. This is generally\nused for system agents or other privileged things that are allowed\nto see the host machine. Most containers will NOT need this.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n---\nTODO(jonesdl) We need to restrict who can use host directory mounts and who can/can not\nmount host directories as read/write.\n+optional\n"
+        },
+        "iscsi": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ISCSIVolumeSource",
+          "description": "ISCSI represents an ISCSI Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/iscsi/README.md\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Volume's name.\nMust be a DNS_LABEL and unique within the pod.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names\n"
+        },
+        "nfs": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.NFSVolumeSource",
+          "description": "NFS represents an NFS mount on the host that shares a pod's lifetime\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional\n"
+        },
+        "persistentVolumeClaim": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.PersistentVolumeClaimVolumeSource",
+          "description": "PersistentVolumeClaimVolumeSource represents a reference to a\nPersistentVolumeClaim in the same namespace.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims\n+optional\n"
+        },
+        "photonPersistentDisk": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.PhotonPersistentDiskVolumeSource",
+          "description": "PhotonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host machine\n"
+        },
+        "portworxVolume": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.PortworxVolumeSource",
+          "description": "PortworxVolume represents a portworx volume attached and mounted on kubelets host machine\n+optional\n"
+        },
+        "projected": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ProjectedVolumeSource",
+          "description": "Items for all in one resources secrets, configmaps, and downward API\n"
+        },
+        "quobyte": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.QuobyteVolumeSource",
+          "description": "Quobyte represents a Quobyte mount on the host that shares a pod's lifetime\n+optional\n"
+        },
+        "rbd": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.RBDVolumeSource",
+          "description": "RBD represents a Rados Block Device mount on the host that shares a pod's lifetime.\nMore info: https://releases.k8s.io/HEAD/examples/volumes/rbd/README.md\n+optional\n"
+        },
+        "scaleIO": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ScaleIOVolumeSource",
+          "description": "ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.\n+optional\n"
+        },
+        "secret": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.SecretVolumeSource",
+          "description": "Secret represents a secret that should populate this volume.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#secret\n+optional\n"
+        },
+        "storageos": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.StorageOSVolumeSource",
+          "description": "StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.\n+optional\n"
+        },
+        "vsphereVolume": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.VsphereVirtualDiskVolumeSource",
+          "description": "VsphereVolume represents a vSphere volume attached and mounted on kubelets host machine\n+optional\n"
+        }
+      },
+      "description": "Volume represents a named volume in a pod that may be accessed by any container in the pod.\n"
+    },
+    "k8s.io.api.core.v1.VolumeDevice": {
+      "properties": {
+        "devicePath": {
+          "type": "string",
+          "description": "devicePath is the path inside of the container that the device will be mapped to.\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "name must match the name of a persistentVolumeClaim in the pod\n"
+        }
+      },
+      "description": "volumeDevice describes a mapping of a raw block device within a container.\n"
+    },
+    "k8s.io.api.core.v1.VolumeMount": {
+      "properties": {
+        "mountPath": {
+          "type": "string",
+          "description": "Path within the container at which the volume should be mounted.  Must\nnot contain ':'.\n"
+        },
+        "mountPropagation": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.MountPropagationMode",
+          "description": "mountPropagation determines how mounts are propagated from the host\nto container and the other way around.\nWhen not set, MountPropagationNone is used.\nThis field is beta in 1.10.\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "This must match the Name of a Volume.\n"
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Mounted read-only if true, read-write otherwise (false or unspecified).\nDefaults to false.\n+optional\n"
+        },
+        "subPath": {
+          "type": "string",
+          "description": "Path within the volume from which the container's volume should be mounted.\nDefaults to \"\" (volume's root).\n+optional\n"
+        },
+        "subPathExpr": {
+          "type": "string",
+          "description": "Expanded path within the volume from which the container's volume should be mounted.\nBehaves similarly to SubPath but environment variable references $(VAR_NAME) are expanded using the container's environment.\nDefaults to \"\" (volume's root).\nSubPathExpr and SubPath are mutually exclusive.\nThis field is alpha in 1.14.\n+optional\n"
+        }
+      },
+      "description": "VolumeMount describes a mounting of a Volume within a container.\n"
+    },
+    "k8s.io.api.core.v1.VolumeProjection": {
+      "properties": {
+        "configMap": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ConfigMapProjection",
+          "description": "information about the configMap data to project\n+optional\n"
+        },
+        "downwardAPI": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.DownwardAPIProjection",
+          "description": "information about the downwardAPI data to project\n+optional\n"
+        },
+        "secret": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.SecretProjection",
+          "description": "information about the secret data to project\n+optional\n"
+        },
+        "serviceAccountToken": {
+          "$ref": "#/definitions/k8s.io.api.core.v1.ServiceAccountTokenProjection",
+          "description": "information about the serviceAccountToken data to project\n+optional\n"
+        }
+      },
+      "description": "Projection that may be projected along with other supported volume types\n"
+    },
+    "k8s.io.api.core.v1.VsphereVirtualDiskVolumeSource": {
+      "properties": {
+        "fsType": {
+          "type": "string",
+          "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional\n"
+        },
+        "storagePolicyID": {
+          "type": "string",
+          "description": "Storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.\n+optional\n"
+        },
+        "storagePolicyName": {
+          "type": "string",
+          "description": "Storage Policy Based Management (SPBM) profile name.\n+optional\n"
+        },
+        "volumePath": {
+          "type": "string",
+          "description": "Path that identifies vSphere volume vmdk\n"
+        }
+      },
+      "description": "Represents a vSphere volume resource.\n"
+    },
+    "k8s.io.apimachinery.pkg.api.resource.Quantity": {
+      "description": "Quantity is a fixed-point representation of a number.\nIt provides convenient marshaling/unmarshaling in JSON and YAML,\nin addition to String() and Int64() accessors.\n\nThe serialization format is:\n\n\u003cquantity\u003e        ::= \u003csignedNumber\u003e\u003csuffix\u003e\n  (Note that \u003csuffix\u003e may be empty, from the \"\" case in \u003cdecimalSI\u003e.)\n\u003cdigit\u003e           ::= 0 | 1 | ... | 9\n\u003cdigits\u003e          ::= \u003cdigit\u003e | \u003cdigit\u003e\u003cdigits\u003e\n\u003cnumber\u003e          ::= \u003cdigits\u003e | \u003cdigits\u003e.\u003cdigits\u003e | \u003cdigits\u003e. | .\u003cdigits\u003e\n\u003csign\u003e            ::= \"+\" | \"-\"\n\u003csignedNumber\u003e    ::= \u003cnumber\u003e | \u003csign\u003e\u003cnumber\u003e\n\u003csuffix\u003e          ::= \u003cbinarySI\u003e | \u003cdecimalExponent\u003e | \u003cdecimalSI\u003e\n\u003cbinarySI\u003e        ::= Ki | Mi | Gi | Ti | Pi | Ei\n  (International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\u003cdecimalSI\u003e       ::= m | \"\" | k | M | G | T | P | E\n  (Note that 1024 = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n\u003cdecimalExponent\u003e ::= \"e\" \u003csignedNumber\u003e | \"E\" \u003csignedNumber\u003e\n\nNo matter which of the three exponent forms is used, no quantity may represent\na number greater than 2^63-1 in magnitude, nor may it have more than 3 decimal\nplaces. Numbers larger or more precise will be capped or rounded up.\n(E.g.: 0.1m will rounded up to 1m.)\nThis may be extended in the future if we require larger or smaller quantities.\n\nWhen a Quantity is parsed from a string, it will remember the type of suffix\nit had, and will use the same type again when it is serialized.\n\nBefore serializing, Quantity will be put in \"canonical form\".\nThis means that Exponent/suffix will be adjusted up or down (with a\ncorresponding increase or decrease in Mantissa) such that:\n  a. No precision is lost\n  b. No fractional digits will be emitted\n  c. The exponent (or suffix) is as large as possible.\nThe sign will be omitted unless the number is negative.\n\nExamples:\n  1.5 will be serialized as \"1500m\"\n  1.5Gi will be serialized as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented by a\nfloating point number. That is the whole point of this exercise.\n\nNon-canonical values will still parse as long as they are well formed,\nbut will be re-emitted in their canonical form. (So always use canonical\nform, or don't diff.)\n\nThis format is intended to make it difficult to use these numbers without\nwriting some sort of special handling code in the hopes that that will\ncause implementors to also use a fixed point implementation.\n\n+protobuf=true\n+protobuf.embed=string\n+protobuf.options.marshal=false\n+protobuf.options.(gogoproto.goproto_stringer)=false\n+k8s:deepcopy-gen=true\n+k8s:openapi-gen=true\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.CauseType": {
+      "type": "string",
+      "description": "CauseType is a machine readable value providing more detail about what\noccurred in a status response. An operation may have multiple causes for a\nstatus (whether Failure or Success).\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.Initializer": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "name of the process that is responsible for initializing this object.\n"
+        }
+      },
+      "description": "Initializer is information about an initializer that has not yet completed.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.Initializers": {
+      "properties": {
+        "pending": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.Initializer"
+          },
+          "type": "array",
+          "description": "Pending is a list of initializers that must execute in order before this object is visible.\nWhen the last pending initializer is removed, and no failing result is set, the initializers\nstruct will be set to nil and the object is considered as initialized and visible to all\nclients.\n+patchMergeKey=name\n+patchStrategy=merge\n"
+        },
+        "result": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.Status",
+          "description": "If result is set with the Failure field, the object will be persisted to storage and then deleted,\nensuring that other clients can observe the deletion.\n"
+        }
+      },
+      "description": "Initializers tracks the progress of initialization.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta": {
+      "properties": {
+        "continue": {
+          "type": "string",
+          "description": "continue may be set if the user set a limit on the number of items returned, and indicates that\nthe server has more data available. The value is opaque and may be used to issue another request\nto the endpoint that served this list to retrieve the next set of available objects. Continuing a\nlist may not be possible if the server configuration has changed or more than a few minutes have\npassed. The resourceVersion field returned when using this continue value will be identical to\nthe value in the first response.\n"
+        },
+        "resourceVersion": {
+          "type": "string",
+          "description": "String that identifies the server's internal version of this object that\ncan be used by clients to determine when objects have changed.\nValue must be treated as opaque by clients and passed unmodified back to the server.\nPopulated by the system.\nRead-only.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency\n+optional\n"
+        },
+        "selfLink": {
+          "type": "string",
+          "description": "selfLink is a URL representing this object.\nPopulated by the system.\nRead-only.\n+optional\n"
+        }
+      },
+      "description": "ListMeta describes metadata that synthetic resources must have, including lists and\nvarious status objects. A resource may have only one of {ObjectMeta, ListMeta}.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta": {
+      "properties": {
+        "annotations": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: http://kubernetes.io/docs/user-guide/annotations\n+optional\n"
+        },
+        "clusterName": {
+          "type": "string",
+          "description": "The name of the cluster which the object belongs to.\nThis is used to distinguish resources with same name and namespace in different clusters.\nThis field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.\n+optional\n"
+        },
+        "creationTimestamp": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.Time",
+          "description": "CreationTimestamp is a timestamp representing the server time when this object was\ncreated. It is not guaranteed to be set in happens-before order across separate operations.\nClients may not set this value. It is represented in RFC3339 form and is in UTC.\n\nPopulated by the system.\nRead-only.\nNull for lists.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata\n+optional\n"
+        },
+        "deletionGracePeriodSeconds": {
+          "type": "integer",
+          "description": "Number of seconds allowed for this object to gracefully terminate before\nit will be removed from the system. Only set when deletionTimestamp is also set.\nMay only be shortened.\nRead-only.\n+optional\n"
+        },
+        "deletionTimestamp": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.Time",
+          "description": "DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This\nfield is set by the server when a graceful deletion is requested by the user, and is not\ndirectly settable by a client. The resource is expected to be deleted (no longer visible\nfrom resource lists, and not reachable by name) after the time in this field, once the\nfinalizers list is empty. As long as the finalizers list contains items, deletion is blocked.\nOnce the deletionTimestamp is set, this value may not be unset or be set further into the\nfuture, although it may be shortened or the resource may be deleted prior to this time.\nFor example, a user may request that a pod is deleted in 30 seconds. The Kubelet will react\nby sending a graceful termination signal to the containers in the pod. After that 30 seconds,\nthe Kubelet will send a hard termination signal (SIGKILL) to the container and after cleanup,\nremove the pod from the API. In the presence of network partitions, this object may still\nexist after this timestamp, until an administrator or automated process can determine the\nresource is fully terminated.\nIf not set, graceful deletion of the object has not been requested.\n\nPopulated by the system when a graceful deletion is requested.\nRead-only.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata\n+optional\n"
+        },
+        "finalizers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Must be empty before the object is deleted from the registry. Each entry\nis an identifier for the responsible component that will remove the entry\nfrom the list. If the deletionTimestamp of the object is non-nil, entries\nin this list can only be removed.\n+optional\n+patchStrategy=merge\n"
+        },
+        "generateName": {
+          "type": "string",
+          "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will\nNOT return a 409 - instead, it will either return 201 Created or 500 with Reason\nServerTimeout indicating a unique name could not be found in the time allotted, and the client\nshould retry (optionally after the time indicated in the Retry-After header).\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency\n+optional\n"
+        },
+        "generation": {
+          "type": "integer",
+          "description": "A sequence number representing a specific generation of the desired state.\nPopulated by the system. Read-only.\n+optional\n"
+        },
+        "initializers": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.Initializers",
+          "description": "An initializer is a controller which enforces some system invariant at object creation time.\nThis field is a list of initializers that have not yet acted on this object. If nil or empty,\nthis object has been completely initialized. Otherwise, the object is considered uninitialized\nand is hidden (in list/watch and get calls) from clients that haven't explicitly asked to\nobserve uninitialized objects.\n\nWhen an object is created, the system will populate this list with the current set of initializers.\nOnly privileged users may set or modify this list. Once it is empty, it may not be modified further\nby any user.\n"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: http://kubernetes.io/docs/user-guide/labels\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#names\n+optional\n"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Namespace defines the space within each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/namespaces\n+optional\n"
+        },
+        "ownerReferences": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.OwnerReference"
+          },
+          "type": "array",
+          "description": "List of objects depended by this object. If ALL objects in the list have\nbeen deleted, this object will be garbage collected. If this object is managed by a controller,\nthen an entry in this list will point to this controller, with the controller field set to true.\nThere cannot be more than one managing controller.\n+optional\n+patchMergeKey=uid\n+patchStrategy=merge\n"
+        },
+        "resourceVersion": {
+          "type": "string",
+          "description": "An opaque value that represents the internal version of this object that can\nbe used by clients to determine when objects have changed. May be used for optimistic\nconcurrency, change detection, and the watch operation on a resource or set of resources.\nClients must treat these values as opaque and passed unmodified back to the server.\nThey may only be valid for a particular resource or set of resources.\n\nPopulated by the system.\nRead-only.\nValue must be treated as opaque by clients and .\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency\n+optional\n"
+        },
+        "selfLink": {
+          "type": "string",
+          "description": "SelfLink is a URL representing this object.\nPopulated by the system.\nRead-only.\n+optional\n"
+        },
+        "uid": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.types.UID",
+          "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids\n+optional\n"
+        }
+      },
+      "description": "ObjectMeta is metadata that all persisted resources must have, which includes all objects\nusers must create.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.OwnerReference": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "API version of the referent.\n"
+        },
+        "blockOwnerDeletion": {
+          "type": "boolean",
+          "description": "If true, AND if the owner has the \"foregroundDeletion\" finalizer, then\nthe owner cannot be deleted from the key-value store until this\nreference is removed.\nDefaults to false.\nTo set this field, a user needs \"delete\" permission of the owner,\notherwise 422 (Unprocessable Entity) will be returned.\n+optional\n"
+        },
+        "controller": {
+          "type": "boolean",
+          "description": "If true, this reference points to the managing controller.\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind of the referent.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the referent.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#names\n"
+        },
+        "uid": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.types.UID",
+          "description": "UID of the referent.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids\n"
+        }
+      },
+      "description": "OwnerReference contains enough information to let you identify an owning\nobject. Currently, an owning object must be in the same namespace, so there\nis no namespace field.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.Status": {
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "description": "APIVersion defines the versioned schema of this representation of an object.\nServers should convert recognized schemas to the latest internal value, and\nmay reject unrecognized values.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources\n+optional\n"
+        },
+        "code": {
+          "type": "integer",
+          "description": "Suggested HTTP return code for this status, 0 if not set.\n+optional\n"
+        },
+        "details": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.StatusDetails",
+          "description": "Extended data associated with the reason.  Each reason may define its\nown extended details. This field is optional and the data returned\nis not guaranteed to conform to any schema except that defined by\nthe reason type.\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Kind is a string value representing the REST resource this object represents.\nServers may infer this from the endpoint the client submits requests to.\nCannot be updated.\nIn CamelCase.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "message": {
+          "type": "string",
+          "description": "A human-readable description of the status of this operation.\n+optional\n"
+        },
+        "metadata": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta",
+          "description": "Standard list metadata.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "reason": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.StatusReason",
+          "description": "A machine-readable description of why this operation is in the\n\"Failure\" status. If this value is empty there\nis no information available. A Reason clarifies an HTTP status\ncode but does not override it.\n+optional\n"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the operation.\nOne of: \"Success\" or \"Failure\".\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status\n+optional\n"
+        }
+      },
+      "description": "Status is a return value for calls that don't return other objects.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.StatusCause": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "The field of the resource that has caused this error, as named by its JSON\nserialization. May include dot and postfix notation for nested attributes.\nArrays are zero-indexed.  Fields may appear more than once in an array of\ncauses due to fields having multiple errors.\nOptional.\n\nExamples:\n  \"name\" - the field \"name\" on the current resource\n  \"items[0].name\" - the field \"name\" on the first array entry in \"items\"\n+optional\n"
+        },
+        "message": {
+          "type": "string",
+          "description": "A human-readable description of the cause of the error.  This field may be\npresented as-is to a reader.\n+optional\n"
+        },
+        "reason": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.CauseType",
+          "description": "A machine-readable description of the cause of the error. If this value is\nempty there is no information available.\n+optional\n"
+        }
+      },
+      "description": "StatusCause provides more information about an api.Status failure, including\ncases when multiple errors are encountered.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.StatusDetails": {
+      "properties": {
+        "causes": {
+          "items": {
+            "$ref": "#/definitions/k8s.io.apimachinery.pkg.apis.meta.v1.StatusCause"
+          },
+          "type": "array",
+          "description": "The Causes array includes more details associated with the StatusReason\nfailure. Not all StatusReasons may provide detailed causes.\n+optional\n"
+        },
+        "group": {
+          "type": "string",
+          "description": "The group attribute of the resource associated with the status StatusReason.\n+optional\n"
+        },
+        "kind": {
+          "type": "string",
+          "description": "The kind attribute of the resource associated with the status StatusReason.\nOn some operations may differ from the requested resource Kind.\nMore info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\n+optional\n"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name attribute of the resource associated with the status StatusReason\n(when there is a single name which can be described).\n+optional\n"
+        },
+        "retryAfterSeconds": {
+          "type": "integer",
+          "description": "If specified, the time in seconds before the operation should be retried. Some errors may indicate\nthe client must take an alternate action - for those errors this field may indicate how long to wait\nbefore taking the alternate action.\n+optional\n"
+        },
+        "uid": {
+          "$ref": "#/definitions/k8s.io.apimachinery.pkg.types.UID",
+          "description": "UID of the resource.\n(when there is a single resource which can be described).\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids\n+optional\n"
+        }
+      },
+      "description": "StatusDetails is a set of additional properties that MAY be set by the\nserver to provide additional information about a response. The Reason\nfield of a Status object defines what attributes will be set. Clients\nmust ignore fields that do not match the defined type of each attribute,\nand should assume that any attribute may be empty, invalid, or under\ndefined.\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.StatusReason": {
+      "type": "string",
+      "description": "StatusReason is an enumeration of possible failure causes.  Each StatusReason\nmust map to a single HTTP status code, but multiple reasons may map\nto the same HTTP status code.\nTODO: move to apiserver\n"
+    },
+    "k8s.io.apimachinery.pkg.apis.meta.v1.Time": {
+      "description": "Time is a wrapper around time.Time which supports correct\nmarshaling to YAML and JSON.  Wrappers are provided for many\nof the factory methods that the time package offers.\n\n+protobuf.options.marshal=false\n+protobuf.as=Timestamp\n+protobuf.options.(gogoproto.goproto_stringer)=false\n",
+      "type": "string",
+      "format": "date-time"
+    },
+    "k8s.io.apimachinery.pkg.types.UID": {
+      "type": "string",
+      "description": "UID is a type that holds unique ID values, including UUIDs.  Because we\ndon't ONLY use UUIDs, this is an alias to string.  Being a type captures\nintent and helps make sure that UIDs and names do not get conflated.\n"
+    },
+    "k8s.io.apimachinery.pkg.util.intstr.IntOrString": {
+      "description": "IntOrString is a type that can hold an int32 or a string.  When used in\nJSON or YAML marshalling and unmarshalling, it produces or consumes the\ninner type.  This allows you to have, for example, a JSON field that can\naccept a name or number.\nTODO: Rename to Int32OrString\n\n+protobuf=true\n+protobuf.options.(gogoproto.goproto_stringer)=false\n+k8s:openapi-gen=true\n",
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+name: kubernetes-deployment
+label: Kubernetes Deployment
+markdownDescription: Creates yaml for Kubernetes Deployment object
+insertText: |2
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: ${1:appname}-deployment
+  spec:
+    selector:
+      matchLabels:
+        app: ${1:appname}
+    template:
+      metadata:
+        labels:
+          app: ${1:appname}
+      spec:
+        containers:
+        - name: ${1:appname}
+          image: ${2:gcr.io/google-containers/busybox}
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+          - containerPort: ${3:8080}

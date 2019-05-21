@@ -1,0 +1,16 @@
+name: skaffold-bazel
+label: Skaffold Bazel example
+markdownDescription: |2
+  Bazel is one of the supported builders in Skaffold. [Read more.](https://github.com/GoogleContainerTools/skaffold/tree/master/examples/bazel)
+  1. make sure the context contains the bazel files (`WORKSPACE`, `BUILD`)
+  2. add bazel to each artifact
+  3. specify target - our builder will use this to load to the image to the Docker daemon
+insertText: |2
+  apiVersion: skaffold/v1beta2
+  kind: Config
+  build:
+    artifacts:
+    - image: ${1:gcr.io/k8s-skaffold/skaffold-bazel}
+      context: .
+      bazel:
+        target: ${2://:skaffold_example.tar}

@@ -33,3 +33,33 @@ extract () {
         echo "'$1' is not a valid file"
     fi
 }
+
+
+vscode2 () {
+    while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    VSCODE_COMMAND="docker stop vscode || echo 'no hay docker' ; $GCLOUD1 -d --name vscode $GCLOUD2 $GCLOUD3 code-server -H -N -e /root/.vsextentions ; /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:8443 --profile-directory=\"Profile 4\" "
+
+    case $PARAM in
+        -s | --stop)
+            VSCODE_COMMAND="docker stop vscode"
+            ;;
+        -j | --justchrome)
+            VSCODE_COMMAND="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:8443 --profile-directory=\"Profile 4\" "
+            ;;
+        -J | --justdocker)
+            VSCODE_COMMAND="docker stop vscode || echo 'no hay docker' ; $GCLOUD1 -d --name vscode $GCLOUD2 $GCLOUD3 code-server -H -N -e /root/.vsextentions"
+            ;;
+        .)
+            VSCODE_COMMAND="docker stop vscode || echo 'no hay docker' ; $GCLOUD1 -d --name vscode -v $PWD:/var/gcloud:cached -w /var/gcloud $GCLOUD3 code-server -H -N -e /root/.vsextentions ; /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:8443 --profile-directory=\"Profile 4\" "
+            ;;
+        *)
+            VSCODE_COMMAND="docker stop vscode || echo 'no hay docker' ; $GCLOUD1 -d --name vscode -v $1:/var/gcloud:cached -w /var/gcloud $GCLOUD3 code-server -H -N -e /root/.vsextentions ; /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:8443 --profile-directory=\"Profile 4\" "
+            ;;
+    esac
+    shift
+    echo "command $VSCODE_COMMAND"
+done
+
+}

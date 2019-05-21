@@ -7,6 +7,7 @@ brew list tmux || brew install tmux
 brew list neovim || brew install neovim
 brew list python || brew install python
 brew list zsh || brew install zsh
+gem install colorls
 echo "spacevim installation"
 ls ~/.SpaceVim || (curl -sLf https://spacevim.org/install.sh | bash)
 echo "oh-my-zsh installation"

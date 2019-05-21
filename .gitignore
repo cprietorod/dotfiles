@@ -3,4 +3,6 @@ local/share/code-server/CachedExtensions
 local/share/code-server/globalStorage
 local/share/code-server/self-signed.cert
 local/share/code-server/self-signed.key
-
+*.pyc
+vsextentions/ms-python.python-2019.4.12954/pythonFiles/
+vsextentions/ms-python.python-2019.4.12954/pythonFiles/*

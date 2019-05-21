@@ -35,3 +35,5 @@ elif [ "$machine" = "Mac" ]; then
   source .mac_functions
   tmux info &> /dev/null || exit
 fi
+
+export PATH="/usr/local/opt/mysql-client/bin:$PATH"
