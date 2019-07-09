@@ -1,6 +1,5 @@
 enable_venv(){
     p=$PWD
-    ls 
     if [ -d .venv ]; then
         echo "activating virtual env on .venv"
         source .venv/bin/activate
