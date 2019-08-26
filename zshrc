@@ -26,14 +26,14 @@ esac
 
 if [ "$machine" = "Linux" ]; then 
   echo "es linux"
-  source .linux_aliases
-  source .linux_functions
+  source ~/.linux_aliases
+  source ~/.linux_functions
   enable_venv
 elif [ "$machine" = "Mac" ]; then 
   echo "es mac"
   tmux || echo "tmux already run"
-  source .mac_aliases
-  source .mac_functions
+  source ~/.mac_aliases
+  source ~/.mac_functions
   tmux info &> /dev/null || exit
 fi
 

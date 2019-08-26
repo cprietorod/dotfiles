@@ -10,8 +10,8 @@ esac
 
 if [ "$machine" = "Linux" ]; then 
   echo "es linux"
-  source /root/.linux_aliases
-  source /root/.linux_functions
+  source ~/.linux_aliases
+  source ~/.linux_functions
   enable_venv
 elif [ "$machine" = "Mac" ]; then 
   echo "es mac"

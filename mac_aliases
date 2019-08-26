@@ -27,3 +27,4 @@ alias vscode="docker stop vscode || echo 'no hay docker' ; $GCLOUD1 -d --name vs
 alias ls="colorls --sort-dirs"
 alias tree="colorls --tree=2"
 alias lc="colorls -lA --sd"
+alias vscode_only_chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --app=http://localhost:8443 --profile-directory="Profile 4"'

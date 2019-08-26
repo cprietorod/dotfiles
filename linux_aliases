@@ -1,4 +1,4 @@
 alias vscode=" code-server -H -N -e /root/.vsextentions"
-alias ls="colorls --sort-dirs"
+#alias ls="colorls --sort-dirs"
 alias tree="colorls --tree=2"
 alias lc="colorls -lA --sd"
