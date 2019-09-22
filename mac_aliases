@@ -1,5 +1,5 @@
 export PATH=$PWD/:$PATH:$HOME/Desarrollo/scripts:$HOME/Desarrollo/google-cloud-sdk/platform/google_appengine:$HOME/Desarrollo/google-cloud-sdk/bin
-export GCLOUD1='docker run --rm -p 3000:3000 -p 8443:8443 -p 8080:8080 -p 8000:8000  -v ~/:/root:cached -v ~/.config:/root/.config:cached  -v /Users:/Users:cached '
+export GCLOUD1='docker run --rm -p 3000:3000 -p 8443:8443  -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -v ~/:/root:cached -v ~/.config:/root/.config:cached  -v /Users:/Users:cached '
 export GCLOUD2='-v $PWD:/var/gcloud:cached -w /var/gcloud'
 export GCLOUD3='cprietorod/my-cloud-sdk-docker:latest'
 export GCLOUD_COMMAND="$GCLOUD1 -ti $GCLOUD2 $GCLOUD3"
