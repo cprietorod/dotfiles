@@ -63,3 +63,8 @@ vscode2 () {
 done
 
 }
+
+function source {
+  emulate -L bash
+  builtin source "$@"
+}
