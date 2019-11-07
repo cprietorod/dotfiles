@@ -64,7 +64,7 @@ done
 
 }
 
-function source {
+function source_bash {
   emulate -L bash
   builtin source "$@"
 }

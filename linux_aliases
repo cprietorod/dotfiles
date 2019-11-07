@@ -1,4 +1,4 @@
-alias vscode=" code-server -H -N -e /root/.vsextentions"
+alias vscode="code-server --host 0.0.0.0 --port 8443 --extra-extensions-dir /root/.vsextentions  --auth none --user-data-dir /root/.vscode/ &"
 #alias ls="colorls --sort-dirs"
 alias tree="colorls --tree=2"
 alias lc="colorls -lA --sd"
